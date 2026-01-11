@@ -1,0 +1,18 @@
+services:
+  glances:
+    image: nicolargo/glances:latest
+    container_name: glances
+    user: root
+    restart: always
+    environment:
+      - "GLANCES_OPT=-w"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - cosmos-network
+    ports:
+      - "61208:61208"
+
+networks:
+  cosmos-network:
+    external: true

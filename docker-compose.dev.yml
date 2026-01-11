@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  dashboard:
+    image: node:20-alpine
+    container_name: homelab-dashboard-dev
+    working_dir: /app
+    volumes:
+      - .:/app
+    ports:
+      - "3000:3000"
+    command: sh -c "npm install --legacy-peer-deps && npm run dev -- --hostname 0.0.0.0"
+    env_file:
+      - .env.local
+    environment:
+      - NODE_ENV=development
+    user: "${UID:-1000}:${GID:-1000}"
+    restart: unless-stopped

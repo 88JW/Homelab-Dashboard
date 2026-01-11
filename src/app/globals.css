@@ -1,0 +1,29 @@
+@import "tailwindcss";
+
+@theme {
+--font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+--font-mono: "Fira Code", ui-monospace, SFMono-Regular, monospace;
+}
+
+:root {
+--background: #09090b;
+--foreground: #ffffff;
+}
+
+body {
+background-color: var(--background);
+color: var(--foreground);
+font-family: var(--font-sans);
+}
+
+/* Custom scrollbar dla listy kontenerów */
+.custom-scrollbar::-webkit-scrollbar {
+width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+background: #27272a;
+border-radius: 10px;
+}
