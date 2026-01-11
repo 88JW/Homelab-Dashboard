@@ -10,9 +10,9 @@ interface App {
 
 const apps: App[] = [
   { name: 'Immich', url: 'https://immich.miasoftware.pl', icon: '📸', description: 'Photo & Video Management' },
-  { name: 'Mealie', url: 'http://192.168.50.234:9091', icon: '🍳', description: 'Recipe Manager' },
+  { name: 'Mealie', url: 'http://192.168.50.234:9925', icon: '🍳', description: 'Recipe Manager' },
   { name: 'qBittorrent', url: 'http://192.168.50.234:8181', icon: '📥', description: 'Torrent Client' },
-  { name: 'Nextcloud', url: 'https://nextcloud.miasoftware.pl:8443', icon: '☁️', description: 'Cloud Storage' },
+  { name: 'Nextcloud', url: 'https://192.168.50.234:8443', icon: '☁️', description: 'Cloud Storage' },
   { name: 'Beszel', url: 'http://192.168.50.234:8090', icon: '📊', description: 'System Monitor' },
   { name: 'Changedetection', url: 'http://192.168.50.234:5000', icon: '🔍', description: 'Website Monitoring' },
   { name: 'BookWyrm', url: 'http://192.168.50.234:8085', icon: '📚', description: 'Book Tracker' },
