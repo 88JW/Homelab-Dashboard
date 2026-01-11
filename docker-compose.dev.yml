@@ -16,3 +16,10 @@ services:
       - NODE_ENV=development
     user: "${UID:-1000}:${GID:-1000}"
     restart: unless-stopped
+    networks:
+      - default
+      - cosmos-network
+
+networks:
+  cosmos-network:
+    external: true
