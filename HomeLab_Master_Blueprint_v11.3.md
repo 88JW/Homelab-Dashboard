@@ -1,30 +1,30 @@
 # **🛰️ HomeLab miasoftware.pl | Master Blueprint v11.3**
 
-**Status: Laboratory Edition \- Operational & Hardened**
+**Status: Laboratory Edition - Operational & Hardened**
 
 Ten dokument stanowi nadrzędną specyfikację integrującą architekturę systemu, infrastrukturę sprzętową, sieć Docker oraz strategię bezpieczeństwa projektu Homelab.
 
-## **🏗️ 1\. Architektura Systemu (Model BFF)**
+## **🏗️ 1. Architektura Systemu (Model BFF)**
 
 Projekt działa w modelu **Backend-for-Frontend (BFF)**, co zapewnia izolację źródeł danych od interfejsu użytkownika.
 
-* **Glances (Data Source):** Zbiera surowe dane systemowe i udostępnia je przez API v4.  
-* **Next.js API (BFF):** Agreguje dane z wielu endpointów (CPU, MEM, FS, Docker) i serwuje je jako jeden czysty obiekt JSON pod /api/stats.  
-* **React Frontend:** Wykorzystuje bibliotekę **Tremor** do wizualizacji oraz **SWR** do odświeżania danych w czasie rzeczywistym.  
-* **Cosmos Cloud:** Zarządza dostępem zewnętrznym (Reverse Proxy), certyfikatami SSL i bezpiecznym tunelowaniem.
+*   **Glances (Data Source):** Zbiera surowe dane systemowe i udostępnia je przez API v4.
+*   **Next.js API (BFF):** Agreguje dane z wielu endpointów (CPU, MEM, FS, Docker) i serwuje je jako jeden czysty obiekt JSON pod /api/stats.
+*   **React Frontend:** Wykorzystuje bibliotekę **Tremor** do wizualizacji oraz **SWR** do odświeżania danych w czasie rzeczywistym.
+*   **Cosmos Cloud:** Zarządza dostępem zewnętrznym (Reverse Proxy), certyfikatami SSL i bezpiecznym tunelowaniem.
 
-## **🛠️ 2\. Stack Technologiczny (The Lab)**
+## **🛠️ 2. Stack Technologiczny (The Lab)**
 
-* **Framework:** Next.js 15 (App Router), TypeScript.  
-* **Stylizacja:** Tailwind CSS v4 \+ PostCSS (@tailwindcss/postcss).  
-* **UI Kit:** Tremor v3 (analityka), Lucide React (ikony).  
-* **Pobieranie danych:** SWR (Stale-While-Revalidate) \- polling co 2s.  
-* **Konteneryzacja:** Docker & Docker Compose w sieci cosmos-network.
+*   **Framework:** Next.js 15 (App Router), TypeScript.
+*   **Stylizacja:** Tailwind CSS v4 + PostCSS (@tailwindcss/postcss).
+*   **UI Kit:** Tremor v3 (analityka), Lucide React (ikony).
+*   **Pobieranie danych:** SWR (Stale-While-Revalidate) - polling co 2s.
+*   **Konteneryzacja:** Docker & Docker Compose w sieci cosmos-network.
 
-## **🏗️ 3\. Infrastruktura & Sieć (Docker)**
+## **🏗️ 3. Infrastruktura & Sieć (Docker)**
 
 | Warstwa | Komponent | Szczegóły |
-| :---- | :---- | :---- |
+| --- | --- | --- |
 | **Host** | Debian 12 | IP: 192.168.50.234 |
 | **Gateway** | Cosmos Server | SSL via Let's Encrypt |
 | **Network** | cosmos-network | Izolacja backendu (Bazy danych) |
@@ -33,90 +33,90 @@ Projekt działa w modelu **Backend-for-Frontend (BFF)**, co zapewnia izolację �
 ### **📡 Źródła Danych (Data Providers)**
 
 | Usługa | Rola | Protokół | Funkcja w UI |
-| :---- | :---- | :---- | :---- |
+| --- | --- | --- | --- |
 | **Glances** | Metryki systemowe | REST JSON | CPU, RAM, Temp HDD |
 | **Docker Proxy** | Zarządzanie Dockerem | Docker Engine API | Lista kontenerów, Restart/Stop |
 | **CrowdSec LAPI** | Bezpieczeństwo | REST JSON | Lista banów (Więzienie), Ataki |
 | **Cosmos API** | Zarządzanie Gateway | REST JSON | Stan SSL, DNS, Panic Button |
 
-## **💾 4\. Zarządzanie Magazynem Danych (1TB HDD)**
+## **💾 4. Zarządzanie Magazynem Danych (1TB HDD)**
 
 Dysk mechaniczny zamontowany w /mnt/dane służy jako główny magazyn plików i kopii zapasowych.
 
 **Mapa Dysku (/mnt/dane):**
 
-* ./nextcloud/data (\~296MB) : Prywatne pliki chmury Nextcloud.  
-* ./nextcloud/db : Baza MariaDB (Nextcloud).  
-* ./sftpgo/data/wojciech : Dane użytkownika SFTP.  
-* ./backups (\~484MB) : Snapshoty .tar.gz i archiwa projektów.  
-* ./timeshift (\~4.0GB) : Migawki systemu operacyjnego Debian.
+*   ./nextcloud/data (~296MB) : Prywatne pliki chmury Nextcloud.
+*   ./nextcloud/db : Baza MariaDB (Nextcloud).
+*   ./sftpgo/data/wojciech : Dane użytkownika SFTP.
+*   ./backups (~484MB) : Snapshoty .tar.gz i archiwa projektów.
+*   ./timeshift (~4.0GB) : Migawki systemu operacyjnego Debian.
 
-## **🐳 5\. Rejestr Usług (Container Registry)**
+## **🐳 5. Rejestr Usług (Container Registry)**
 
 Wszystkie usługi działają w sieci bridge cosmos-network, co pozwala na komunikację po nazwach kontenerów.
 
 | Usługa | Port (UI) | URL Lokalne / Funkcja | Status |
-| :---- | :---- | :---- | :---- |
+| --- | --- | --- | --- |
 | **Cosmos UI** | 80/443 | `https://192.168.50.234` (Gateway) | ✅ ONLINE |
 | **Nextcloud** | 8443 | `https://192.168.50.234:8443` (Chmura) | ✅ ONLINE |
 | **Immich** | 2283 | `http://192.168.50.234:2283` (Zdjęcia AI) | ✅ ONLINE |
 | **SFTPGo** | 8080 | `http://192.168.50.234:8080` (Pliki) | ✅ ONLINE |
 | **Beszel** | 8090 | `http://192.168.50.234:8090` (Monitoring) | ✅ ONLINE |
 | **Mealie** | 9925 | `http://192.168.50.234:9925` (Przepisy) | ✅ ONLINE |
-| **Audiobookshelf**| 9930 | `http://192.168.50.234:9930` (Audiobooki)| ✅ ONLINE |
+| **Audiobookshelf** | 9930 | `http://192.168.50.234:9930` (Audiobooki) | ✅ ONLINE |
 | **BookWyrm** | 8085 | `http://192.168.50.234:8085` (Książki) | ✅ ONLINE |
-| **qBittorrent** | 8181 | `http://192.168.50.234:8181` (Pobieranie)| ✅ ONLINE |
-| **Changedetection**| 5000 | `http://192.168.50.234:5000` (Śledzenie)| ✅ ONLINE |
+| **qBittorrent** | 8181 | `http://192.168.50.234:8181` (Pobieranie) | ✅ ONLINE |
+| **Changedetection** | 5000 | `http://192.168.50.234:5000` (Śledzenie) | ✅ ONLINE |
 | **SSO Portal** | 3000 | `http://192.168.50.234:3000` (Dashboard + Auth) | ✅ ONLINE |
 | **Glances** | 61208 | `http://192.168.50.234:61208` (API) | ✅ ONLINE |
 | **Camera-FTP** | 21 | FTP (Bez UI) | ✅ ONLINE |
 
-## **🛡️ 6\. Koncepcja Bezpieczeństwa (Hardened Approach)**
+## **🛡️ 6. Koncepcja Bezpieczeństwa (Hardened Approach)**
 
 ### **Warstwy Ochrony**
 
-* **Shield Mode:** Autorska blokada Next.js (wymuszona sesja dla / oraz /api/stats).  
-* **Security Center:** Monitorowanie prób brute-force i raportowanie ich do interfejsu.  
-* **Panic Button:** (Planowane) Globalny przełącznik aktywujący tryb "Under Attack" w Cosmosie.  
-* **CrowdSec:** Dashboard wyświetla listę zablokowanych IP z opcją "Ułaskawienia" (Unban).
+*   **Shield Mode:** Autorska blokada Next.js (wymuszona sesja dla / oraz /api/stats).
+*   **Security Center:** Monitorowanie prób brute-force i raportowanie ich do interfejsu.
+*   **Panic Button:** (Planowane) Globalny przełącznik aktywujący tryb "Under Attack" w Cosmosie.
+*   **CrowdSec:** Dashboard wyświetla listę zablokowanych IP z opcją "Ułaskawienia" (Unban).
 
-## **🚀 7\. Roadmapa Implementacji**
+## **🚀 7. Roadmapa Implementacji**
 
-* **Faza 1 (ZAKOŃCZONA):** Infrastruktura, Docker Log Rotation, Glances (Root).  
-* **Faza 2 (ZAKOŃCZONA):** Szkielet Next.js, Shield Mode, Monitoring CPU/RAM/HDD.  
-* **Faza 3 (W TOKU):** Integracja listy kontenerów, sterowanie Restart/Stop, Alerty Telegram.  
-* **Faza 4 (PLAN):** Logi Live via SSE, widok "Więzienia" CrowdSec, Panic Button.
+*   **Faza 1 (ZAKOŃCZONA):** Infrastruktura, Docker Log Rotation, Glances (Root).
+*   **Faza 2 (ZAKOŃCZONA):** Szkielet Next.js, Shield Mode, Monitoring CPU/RAM/HDD.
+*   **Faza 3 (W TOKU):** Integracja listy kontenerów, sterowanie Restart/Stop, Alerty Telegram.
+*   **Faza 4 (PLAN):** Logi Live via SSE, widok "Więzienia" CrowdSec, Panic Button.
 
-## **📋 8\. Procedury Utrzymania (Maintenance)**
+## **📋 8. Procedury Utrzymania (Maintenance)**
 
-* **Backup Projektów (1.4GB):** tar \-czvf /mnt/dane/backups/projects\_$(date \+%F).tar.gz /home/wojciech/projects  
-* **Monitoring HDD:** df \-h /mnt/dane oraz sudo smartctl \-H /dev/sda
+*   **Backup Projektów (1.4GB):** tar -czvf /mnt/dane/backups/projects\_$(date +%F).tar.gz /home/wojciech/projects
+*   **Monitoring HDD:** df -h /mnt/dane oraz sudo smartctl -H /dev/sda
 
 **Punkty przywracania systemu:**
 
-*Num     Name                 Tags  Description*
+_Num Name Tags Description_
 
-*\------------------------------------------------------------------------------*
+_\------------------------------------------------------------------------------_
 
-*0    \>  2026-01-07\_12-54-48  O     Czysty Cosmos przed domena*
+_0 > 2026-01-07\_12-54-48 O Czysty Cosmos przed domena_
 
-*1    \>  2026-01-07\_13-05-53  O     Po Hardeningu: Sudo, Fail2Ban, SSH*
+_1 > 2026-01-07\_13-05-53 O Po Hardeningu: Sudo, Fail2Ban, SSH_
 
-*2    \>  2026-01-09\_13-40-53  O     Baseline: Iza+Nextcloud+Cosmos OK*
+_2 > 2026-01-09\_13-40-53 O Baseline: Iza+Nextcloud+Cosmos OK_
 
-*3    \>  2026-01-09\_13-47-51  O     Baseline: Full Config*
+_3 > 2026-01-09\_13-47-51 O Baseline: Full Config_
 
-*4    \>  2026-01-09\_22-08-54  O     Immich dziala \- system stabilny*
+_4 > 2026-01-09\_22-08-54 O Immich dziala - system stabilny_
 
-wojciech@linuxserver:\~/projects/immich$ ls \-lh /mnt/dane/backups/
+wojciech@linuxserver:~/projects/immich$ ls -lh /mnt/dane/backups/
 
 total 672M
 
-drwxr-xr-x 2 wojciech wojciech 4.0K Jan  9 13:45 manual
+drwxr-xr-x 2 wojciech wojciech 4.0K Jan 9 13:45 manual
 
-\-rw-r--r-- 1 root     root     672M Jan  9 22:13 projects\_2026-01-09.tar.gz
+\-rw-r--r-- 1 root root 672M Jan 9 22:13 projects\_2026-01-09.tar.gz
 
-drwxr-xr-x 2 wojciech wojciech 4.0K Jan  7 16:55 snapshot\_2026-01-07
+drwxr-xr-x 2 wojciech wojciech 4.0K Jan 7 16:55 snapshot\_2026-01-07
 
 # **🛰️9. Raport Wdrożeniowy: Moduł Camera-FTP**
 
@@ -124,16 +124,15 @@ Uruchomienie lekkiego serwera FTP do obsługi urządzeń nieobsługujących bezp
 
 ### **A. Security & Hardening (Zgodność z Blueprint v11.3)**
 
-* **Ukrywanie sekretów:** Hasła do FTP nie są wpisane na sztywno w kodzie, lecz pobierane z pliku `.env`.  
-* **Segmentacja użytkowników:** Utworzyliśmy osobne konto dla Ciebie (`wojciech`) i osobne dla sprzętu (`sony`). Dzięki temu, w razie kradzieży aparatu, główne hasło pozostaje bezpieczne.
+*   **Ukrywanie sekretów:** Hasła do FTP nie są wpisane na sztywno w kodzie, lecz pobierane z pliku `.env`.
+*   **Segmentacja użytkowników:** Utworzyliśmy osobne konto dla Ciebie (`wojciech`) i osobne dla sprzętu (`sony`). Dzięki temu, w razie kradzieży aparatu, główne hasło pozostaje bezpieczne.
 
 ### **B. Integracja z SFTPGo (Storage)**
 
-* Skonfigurowano mapowanie wolumenów bezpośrednio do struktury danych SFTPGo:  
-  * `/mnt/dane/sftpgo/data/wojciech` \-\> ??  
-  * `/mnt/dane/sftpgo/data/sony` \-\> dla aparatu Sony  
-* **Wynik:** Pliki wrzucane przez "głupi" FTP są natychmiast widoczne w nowoczesnym panelu webowym SFTPGo i możliwe do zarządzania.
-
+*   Skonfigurowano mapowanie wolumenów bezpośrednio do struktury danych SFTPGo:
+    *   `/mnt/dane/sftpgo/data/wojciech` -> ??
+    *   `/mnt/dane/sftpgo/data/sony` -> dla aparatu Sony
+*   **Wynik:** Pliki wrzucane przez "głupi" FTP są natychmiast widoczne w nowoczesnym panelu webowym SFTPGo i możliwe do zarządzania.
 
 # **🗂️ 10. HomeLab NAS: Udostępnienie 3 Dysków przez Samba (v1.0)**
 
@@ -144,14 +143,14 @@ Uruchomienie lekkiego serwera FTP do obsługi urządzeń nieobsługujących bezp
 ## **📋 Architektura Dysków**
 
 | Dysk Samba | Device | Path | Filesystem | Pojemność | Zawartość |
-|:-----------|:-------|:-----|:-----------|:----------|:----------|
+| --- | --- | --- | --- | --- | --- |
 | **homelab-share** | sda1 | /mnt/dane | ext4 | 931GB | Nextcloud, SFTPGo, backups |
 | **photos** | sdc1 | /mnt/photos | NTFS | 1.9TB | Zdjęcia (85GB w Odzyskane/$RECYCLE.BIN) |
 | **backup** | sdb1 | /mnt/backup | NTFS | 1.9TB | Pusty (backupy przyszłe) |
 
 ## **🔧 Konfiguracja Fstab (/etc/fstab)**
 
-```text
+```
 # HomeLab NAS - 3 dyski
 UUID=7CE2B83DE2B7FA0A  /mnt/backup     ntfs-3g  defaults,uid=1000,gid=1000,nofail  0  2
 /dev/sdc1             /mnt/photos    ntfs-3g  defaults,uid=1000,gid=1000,nofail  0  2
@@ -161,7 +160,7 @@ UUID=7CE2B83DE2B7FA0A  /mnt/backup     ntfs-3g  defaults,uid=1000,gid=1000,nofai
 
 ### **Udziały (Shares):**
 
-```ini
+```
 [homelab-share]
 path = /mnt/dane
 browseable = yes
@@ -189,7 +188,7 @@ directory mask = 0777
 
 ### **Global (ważne):**
 
-```ini
+```
 [global]
 workgroup = WORKGROUP
 netbios name = linuxserver
@@ -199,7 +198,7 @@ security = user
 
 ## **🖥️ Windows: Stałe mapowanie dysków**
 
-```text
+```
 Z: → \\192.168.50.234\homelab-share  (Nextcloud/backups)
 X: → \\192.168.50.234\photos         (Zdjęcia 85GB+)
 Y: → \\192.168.50.234\backup         (Pusty 1.8TB)
@@ -209,7 +208,7 @@ Y: → \\192.168.50.234\backup         (Pusty 1.8TB)
 
 ## **✅ Status i testy**
 
-```bash
+```
 # Dyski
 df -hT | grep mnt
 lsblk -f
@@ -224,9 +223,9 @@ tail -f /var/log/samba/log.*
 
 ## **🔒 Bezpieczeństwo**
 
-* ✅ **UFW:** `sudo ufw allow samba`
-* ✅ **Ograniczone IP:** `hosts allow = 192.168.50.0/24`
-* ✅ **Uwierzytelnianie:** `valid users = wojciech`
+*   ✅ **UFW:** `sudo ufw allow samba`
+*   ✅ **Ograniczone IP:** `hosts allow = 192.168.50.0/24`
+*   ✅ **Uwierzytelnianie:** `valid users = wojciech`
 
 ---
 
@@ -285,23 +284,24 @@ providers: [{
 
 **Plik:** `src/middleware.ts`
 
-- Blokada głównej strony bez sesji
-- Redirect do `/login` dla niezalogowanych
-- Przepuszcza `/api/auth/*`, `/_next/*`, `/login`
+*   Blokada głównej strony bez sesji
+*   Redirect do `/login` dla niezalogowanych
+*   Przepuszcza `/api/auth/*`, `/_next/*`, `/login`
 
 ### **C. AppGrid Component**
 
 **Plik:** `src/components/AppGrid.tsx`
 
 8 kafelków z aplikacjami:
-- Immich, Mealie, qBittorrent, Nextcloud
-- Beszel, Changedetection, BookWyrm, Authentik
+
+*   Immich, Mealie, qBittorrent, Nextcloud
+*   Beszel, Changedetection, BookWyrm, Authentik
 
 ### **D. Docker Deployment**
 
 **Plik:** `docker-compose.dev.yml`
 
-```yaml
+```
 services:
   dashboard:
     image: node:20-alpine
@@ -320,40 +320,43 @@ services:
 **Signing Key:** `82c74049-8f71-4c44-8d6e-6c444815d6d5`
 
 **Scope Mappings:**
-- openid (`60c92d8e-4368-446a-9f2f-4e22c7024a55`)
-- email (`8c0b16f7-3019-403e-9f9a-cab4cb686b9d`)
-- profile (`0d40f976-fff6-4804-ab9c-b14d1f024630`)
+
+*   openid (`60c92d8e-4368-446a-9f2f-4e22c7024a55`)
+*   email (`8c0b16f7-3019-403e-9f9a-cab4cb686b9d`)
+*   profile (`0d40f976-fff6-4804-ab9c-b14d1f024630`)
 
 ## **🚀 User Flow**
 
-1. Użytkownik → http://192.168.50.234:3000
-2. Middleware: brak sesji → redirect `/login`
-3. Klik: "Sign in with Authentik"
-4. OAuth2 flow → Authentik weryfikuje
-5. Callback → NextAuth tworzy sesję JWT
-6. Redirect → Dashboard (main page)
-7. **Klik kafelek aplikacji** → SSO automatycznie loguje (jeśli OAuth2 skonfigurowane)
+1.  Użytkownik → http://192.168.50.234:3000
+2.  Middleware: brak sesji → redirect `/login`
+3.  Klik: "Sign in with Authentik"
+4.  OAuth2 flow → Authentik weryfikuje
+5.  Callback → NextAuth tworzy sesję JWT
+6.  Redirect → Dashboard (main page)
+7.  **Klik kafelek aplikacji** → SSO automatycznie loguje (jeśli OAuth2 skonfigurowane)
 
 ## **📦 Backup**
 
 **Lokalizacja:** `/home/wojciech/backups/dashboard-sso-*`
 
 **Zawartość:**
-- `src/` - Cały kod Next.js
-- `.env.local` - OAuth2 credentials
-- `docker-compose.dev.yml` - Konfiguracja kontenera
-- `dashboard-provider.sql` - Provider z Authentik
-- `README.md` - Instrukcje przywracania
+
+*   `src/` - Cały kod Next.js
+*   `.env.local` - OAuth2 credentials
+*   `docker-compose.dev.yml` - Konfiguracja kontenera
+*   `dashboard-provider.sql` - Provider z Authentik
+*   `README.md` - Instrukcje przywracania
 
 **Restore:**
-```bash
+
+```
 bash /home/wojciech/backups/backup-dashboard-sso.sh
 ```
 
 ## **✅ Status Funkcjonalności**
 
 | Funkcja | Status | Opis |
-|:--------|:-------|:-----|
+| --- | --- | --- |
 | **Login SSO** | ✅ Działa | OAuth2 przez Authentik |
 | **User Info** | ✅ Działa | Name, email w headerze |
 | **App Grid** | ✅ Działa | 8 kafelków aplikacji |
@@ -396,14 +399,14 @@ bash /home/wojciech/backups/backup-dashboard-sso.sh
 
 ### **Dwa podejścia do integracji:**
 
-1. **Native OAuth2** (Immich, Mealie): Aplikacja bezpośrednio rozmawia z Authentik
-2. **oauth2-proxy** (qBittorrent): Reverse proxy dla starszych aplikacji bez OAuth2
+1.  **Native OAuth2** (Immich, Mealie): Aplikacja bezpośrednio rozmawia z Authentik
+2.  **oauth2-proxy** (qBittorrent): Reverse proxy dla starszych aplikacji bez OAuth2
 
 ## **🔧 Konfiguracja Providerów**
 
 ### **PostgreSQL Database Structure**
 
-```sql
+```
 -- Provider Base (authentik_core_provider)
 provider_id | name        | authorization_flow_id
 4           | qBittorrent | 4d51b223-c51a-475e-8112-8816a3b96588 (implicit-consent)
@@ -416,15 +419,16 @@ provider_ptr_id | client_id                         | signing_key_id            
 ```
 
 **Krytyczne pola:**
-- `signing_key_id`: Musi być ustawiony, inaczej `/jwks/` endpoint zwraca pusty JSON
-- `issuer_mode`: `per_provider` → każda app ma własny issuer URL
-- `authorization_flow`: `implicit-consent` → bez dodatkowego ekranu potwierdzenia
+
+*   `signing_key_id`: Musi być ustawiony, inaczej `/jwks/` endpoint zwraca pusty JSON
+*   `issuer_mode`: `per_provider` → każda app ma własny issuer URL
+*   `authorization_flow`: `implicit-consent` → bez dodatkowego ekranu potwierdzenia
 
 ### **Scope Mappings (wymagane!)**
 
 Każdy provider musi mieć przypisane 3 zakresy:
 
-```sql
+```
 INSERT INTO authentik_core_provider_property_mappings (provider_id, propertymapping_id)
 VALUES
   (4, '60c92d8e-4368-446a-9f2f-4e22c7024a55'),  -- openid
@@ -438,7 +442,7 @@ VALUES
 
 ### **A. Konfiguracja oauth2-proxy** (`/home/wojciech/projects/qbittorrent/oauth2-proxy.conf`)
 
-```ini
+```
 http_address = "0.0.0.0:4180"
 upstreams = ["http://qbittorrent:8080"]
 
@@ -463,13 +467,14 @@ set_xauthrequest = true
 ```
 
 **Ważne:**
-- `oidc_jwks_url`: Jawnie ustawione, bo oauth2-proxy 7.5.1 źle konstruuje URL z issuer
-- `code_challenge_method = "S256"`: PKCE zabezpieczenie
-- `pass_authorization_header = true`: Przekazuje token do qBittorrent
+
+*   `oidc_jwks_url`: Jawnie ustawione, bo oauth2-proxy 7.5.1 źle konstruuje URL z issuer
+*   `code_challenge_method = "S256"`: PKCE zabezpieczenie
+*   `pass_authorization_header = true`: Przekazuje token do qBittorrent
 
 ### **B. Konfiguracja qBittorrent** (`qBittorrent.conf`)
 
-```ini
+```
 [Preferences]
 WebUI\LocalHostAuth=false
 WebUI\AuthSubnetWhitelistEnabled=true
@@ -480,13 +485,14 @@ WebUI\CSRFProtection=false
 ```
 
 **Dlaczego to działa:**
-- qBittorrent widzi requesty z IP `172.x.x.x` (oauth2-proxy w Docker)
-- IP jest na whiteliście → bypass hasła
-- oauth2-proxy już wcześniej zweryfikował użytkownika przez Authentik
+
+*   qBittorrent widzi requesty z IP `172.x.x.x` (oauth2-proxy w Docker)
+*   IP jest na whiteliście → bypass hasła
+*   oauth2-proxy już wcześniej zweryfikował użytkownika przez Authentik
 
 ### **C. Docker Compose**
 
-```yaml
+```
 services:
   oauth2-proxy:
     image: quay.io/oauth2-proxy/oauth2-proxy:v7.5.1
@@ -513,7 +519,7 @@ services:
 
 ### **A. Utworzenie Providera (przez CLI)**
 
-```bash
+```
 # Wejście do kontenera PostgreSQL
 docker exec -it authentik-postgres psql -U authentik
 
@@ -561,12 +567,13 @@ Button Text:  Login with Authentik
 ```
 
 **Endpoint Discovery:**
-- `http://192.168.50.234:9000/application/o/immich/.well-known/openid-configuration`
+
+*   `http://192.168.50.234:9000/application/o/immich/.well-known/openid-configuration`
 
 ## **⚠️ Najczęstsze Problemy**
 
 | Problem | Przyczyna | Rozwiązanie |
-|:--------|:----------|:------------|
+| --- | --- | --- |
 | **JWKS endpoint pusty** | `signing_key_id IS NULL` | `UPDATE authentik_providers_oauth2_oauth2provider SET signing_key_id='82c74049...'` |
 | **HTTP 403 na /userinfo/** | Brak scope mappings | Dodaj openid, email, profile do `authentik_core_provider_property_mappings` |
 | **Issuer mismatch w Immich** | `issuer_mode = 'global'` | Zmień na `'per_provider'` w bazie |
@@ -579,6 +586,7 @@ Button Text:  Login with Authentik
 ### **Lokalizacja:** `/home/wojciech/backups/authentik-sso-20260111-163321/`
 
 **Zawartość:**
+
 ```
 authentik_database.sql          2.7MB  # Pełny dump PostgreSQL
 oauth2_providers.txt            4.0KB  # Tabela z credentials
@@ -590,7 +598,7 @@ README.md                       3.1KB  # Instrukcje przywracania
 
 ### **Przywracanie:**
 
-```bash
+```
 # 1. Restore bazy danych
 docker exec -i authentik-postgres psql -U authentik < authentik_database.sql
 
@@ -608,7 +616,7 @@ docker-compose -f qbittorrent-docker-compose.yml restart
 ## **✅ Status Wdrożenia**
 
 | Aplikacja | Metoda | Status | URL |
-|:----------|:-------|:-------|:----|
+| --- | --- | --- | --- |
 | **Mealie** | Native OAuth2 | ✅ Działa | http://192.168.50.234:9091 |
 | **qBittorrent** | oauth2-proxy | ✅ Działa | http://192.168.50.234:8181 |
 | **Immich** | Native OAuth2 | ✅ Działa | https://immich.miasoftware.pl |
@@ -616,5 +624,4 @@ docker-compose -f qbittorrent-docker-compose.yml restart
 
 ---
 
-*Ostatnia aktualizacja: 11.01.2026 r.*
-
+_Ostatnia aktualizacja: 11.01.2026 r._

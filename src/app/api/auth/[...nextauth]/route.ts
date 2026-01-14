@@ -48,6 +48,8 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
   },
   debug: true,
+  trustHost: true,
+  useSecureCookies: process.env.NODE_ENV === "production",
 }
 
 const handler = NextAuth(authOptions)

@@ -26,6 +26,42 @@ export async function GET(request: Request) {
       memory: Math.round((c.memory_usage || 0) / 1024 / 1024)
     })) : [];
 
+    // Filtruj główne dyski (wykluczając docker overlay i mountpointy systemowe)
+    const disks = Array.isArray(data.fs) ? data.fs
+      .filter((fs: any) => {
+        // Uwzględnij tylko główne dyski fizyczne po device_name
+        const device = fs.device_name || ''
+        const mount = fs.mnt_point || ''
+        return (device === '/dev/nvme0n1p1' && (mount === '/' || mount === '/mnt')) ||
+               (mount.startsWith('/mnt/') && device.startsWith('/dev/sd'))
+      })
+      .map((fs: any) => {
+        // Nazewnictwo dysków
+        let name = 'DISK'
+        const device = fs.device_name || ''
+        
+        if (device === '/dev/nvme0n1p1') {
+          name = 'SYSTEM'
+        } else if (fs.mnt_point === '/mnt/dane') {
+          name = 'DATA'
+        } else if (fs.mnt_point === '/mnt/photos') {
+          name = 'PHOTOS'
+        } else if (fs.mnt_point === '/mnt/backup') {
+          name = 'BACKUP'
+        } else {
+          name = fs.mnt_point.split('/').pop()?.toUpperCase() || 'DISK'
+        }
+        
+        return {
+          name: name,
+          mount: fs.mnt_point || '/',
+          total: Math.round((fs.size || 0) / 1024 / 1024 / 1024), // GB
+          used: Math.round(((fs.size || 0) - (fs.free || 0)) / 1024 / 1024 / 1024), // GB
+          percent: Math.round(fs.percent || 0),
+          device: fs.device_name || 'N/A'
+        }
+      }) : [];
+
     return NextResponse.json({
       cpu: Math.round(data.cpu?.total || 0),
       mem: Math.round(data.mem?.percent || 0),
@@ -33,6 +69,7 @@ export async function GET(request: Request) {
       uptime: data.uptime || "N/A",
       hostname: data.system?.hostname || 'Debian-HomeLab',
       containers: containers,
+      disks: disks,
       security: {
         failedLogins: failedLoginAttempts,
         threatLevel: failedLoginAttempts > 10 ? 'HIGH' : failedLoginAttempts > 0 ? 'MEDIUM' : 'LOW'
