@@ -1,3 +1,6 @@
+"use client"
+
+import { useEffect, useState } from "react"
 import { Camera, Utensils, Download, HardDrive, Activity, Globe, ExternalLink, KeyRound } from "lucide-react"
 
 const services = [
@@ -8,6 +11,7 @@ const services = [
     status: "online",
     color: "from-purple-500 to-pink-500",
     url: "https://immich.miasoftware.pl/photos",
+    androidPackage: "app.alextran.immich",
   },
   {
     name: "Mealie",
@@ -16,6 +20,7 @@ const services = [
     status: "online",
     color: "from-emerald-500 to-teal-500",
     url: "http://192.168.50.234:9925",
+    androidPackage: "com.pabloromeo.mealie",
   },
   {
     name: "qBittorrent",
@@ -24,6 +29,7 @@ const services = [
     status: "online",
     color: "from-blue-500 to-cyan-500",
     url: "http://192.168.50.234:8181",
+    androidPackage: "me.fengmilo.qbitorrent",
   },
   {
     name: "SFTPGo",
@@ -48,6 +54,7 @@ const services = [
     status: "online",
     color: "from-rose-500 to-pink-500",
     url: "http://192.168.50.234:9000",
+    androidPackage: "io.goauthentik.app",
   },
   {
     name: "Cosmos",
@@ -60,6 +67,12 @@ const services = [
 ]
 
 export function ServicesLaunchpad() {
+  const [isAndroid, setIsAndroid] = useState(false)
+
+  useEffect(() => {
+    setIsAndroid(/android/i.test(navigator.userAgent))
+  }, [])
+
   return (
     <section>
       <div className="flex items-center gap-3 mb-6">
@@ -70,7 +83,7 @@ export function ServicesLaunchpad() {
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-7 gap-4">
         {services.map((service) => (
-          <ServiceTile key={service.name} service={service} />
+          <ServiceTile key={service.name} service={service} isAndroid={isAndroid} />
         ))}
       </div>
     </section>
@@ -79,15 +92,28 @@ export function ServicesLaunchpad() {
 
 function ServiceTile({
   service,
+  isAndroid,
 }: {
   service: (typeof services)[0]
+  isAndroid: boolean
 }) {
   const Icon = service.icon
 
+  // Construct Android Intent URL if applicable
+  const getHref = () => {
+    if (isAndroid && service.androidPackage) {
+      // Intent format: intent://<host>#Intent;scheme=<scheme>;package=<package>;S.browser_fallback_url=<fallback>;end
+      // We use the URL as fallback
+      const url = new URL(service.url)
+      return `intent://${url.host}${url.pathname}#Intent;scheme=${url.protocol.replace(':', '')};package=${service.androidPackage};S.browser_fallback_url=${encodeURIComponent(service.url)};end`
+    }
+    return service.url
+  }
+
   return (
     <a
-      href={service.url}
-      target="_blank"
+      href={getHref()}
+      target={isAndroid && service.androidPackage ? "_self" : "_blank"}
       rel="noopener noreferrer"
       className="group relative overflow-hidden rounded-2xl border border-slate-700/50 bg-slate-800/30 backdrop-blur-xl p-6 transition-all duration-300 hover:scale-105 hover:border-cyan-500/50 hover:shadow-[0_0_40px_rgba(6,182,212,0.15)]"
     >
