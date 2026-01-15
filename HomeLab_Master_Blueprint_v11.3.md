@@ -67,6 +67,7 @@ Wszystkie usługi działają w sieci bridge cosmos-network, co pozwala na komuni
 | **BookWyrm** | 8085 | `http://192.168.50.234:8085` (Książki) | ✅ ONLINE |
 | **qBittorrent** | 8181 | `http://192.168.50.234:8181` (Pobieranie) | ✅ ONLINE |
 | **Changedetection** | 5000 | `http://192.168.50.234:5000` (Śledzenie) | ✅ ONLINE |
+| **n8n** | 5679 | `http://192.168.50.234:5679` (Automatyzacja) | ✅ ONLINE |
 | **SSO Portal** | 3000 | `http://192.168.50.234:3000` (Dashboard + Auth) | ✅ ONLINE |
 | **Glances** | 61208 | `http://192.168.50.234:61208` (API) | ✅ ONLINE |
 | **Camera-FTP** | 21 | FTP (Bez UI) | ✅ ONLINE |

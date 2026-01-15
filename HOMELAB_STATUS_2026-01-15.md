@@ -1,7 +1,7 @@
-# 🏠 HomeLab Status Report - 14 stycznia 2026
+# 🏠 HomeLab Status Report - 15 stycznia 2026
 
 **Serwer:** Debian 12 (192.168.50.234)  
-**Ostatni backup:** 14.01.2026 11:34 (47MB)  
+**Ostatni backup:** 15.01.2026 13:47 (45MB)  
 **Status:** ✅ Operational & Secured  
 **Dashboard:** https://dash.miasoftware.pl (cyberpunk design v11.3)
 
@@ -9,12 +9,13 @@
 
 ## 📊 AKTUALNY STAN SYSTEMU
 
-### ✅ DZIAŁAJĄCE USŁUGI (9 aplikacji)
+### ✅ DZIAŁAJĄCE USŁUGI (10 aplikacji)
 
 | Usługa | Port | URL | SSO | Status | Notatki |
 |:-------|:-----|:----|:----|:-------|:--------|
 | **Dashboard** | 3000 | https://dash.miasoftware.pl | ✅ Authentik | 🟢 ONLINE | Next.js 16 + NextAuth + Cyberpunk UI |
 | **Authentik** | 9000 | http://192.168.50.234:9000 | ⚙️ Admin | 🟢 ONLINE | SSO Provider (v2024.12.3) |
+| **n8n** | 5679 | http://192.168.50.234:5679 | ✅ oauth2-proxy | 🟢 ONLINE | Automation Engine v1.121.0 |
 | **Immich** | 2283 | https://immich.miasoftware.pl | ✅ OAuth2 | 🟢 ONLINE | Photo Management + AI |
 | **Mealie** | 9925 | http://192.168.50.234:9925 | ✅ OAuth2 | 🟢 ONLINE | Recipe Manager |
 | **qBittorrent** | 8181 | http://192.168.50.234:8181 | ✅ oauth2-proxy | 🟢 ONLINE | Torrent Client |
@@ -50,6 +51,7 @@
 | - | Immich | Photo Management | Native OAuth2 | *(sprawdź w Authentik)* | ✅ Działa |
 | - | Mealie | Recipe Manager | Native OAuth2 | *(sprawdź w Authentik)* | ✅ Działa |
 | - | qBittorrent | Torrent Client | oauth2-proxy | *(sprawdź w Authentik)* | ✅ Działa |
+| - | n8n | Automation Engine | oauth2-proxy | `5EdbWtpCWVM9GL0qgV5vG2zyhc...` | ✅ Działa |
 
 ### ❌ Usunięte Providery
 
@@ -63,6 +65,7 @@ Immich:       https://immich.miasoftware.pl/auth/login
               https://immich.miasoftware.pl/user-settings
 Mealie:       http://192.168.50.234:9925/login
 qBittorrent:  http://192.168.50.234:8181/oauth2/callback
+n8n:          http://192.168.50.234:5679/oauth2/callback
 ```
 
 ---

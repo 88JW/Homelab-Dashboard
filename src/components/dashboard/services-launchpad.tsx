@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Camera, Utensils, Download, HardDrive, Activity, Globe, ExternalLink, KeyRound } from "lucide-react"
+import { Camera, Utensils, Download, HardDrive, Activity, Globe, ExternalLink, KeyRound, Zap } from "lucide-react"
 
 const services = [
   {
@@ -12,6 +12,14 @@ const services = [
     color: "from-purple-500 to-pink-500",
     url: "https://immich.miasoftware.pl/photos",
     androidPackage: "app.alextran.immich",
+  },
+  {
+    name: "n8n",
+    description: "Automation",
+    icon: Zap,
+    status: "online",
+    color: "from-orange-500 to-red-600",
+    url: "http://192.168.50.234:5679",
   },
   {
     name: "Mealie",
