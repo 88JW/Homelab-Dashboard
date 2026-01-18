@@ -88,7 +88,7 @@ INSERT INTO authentik_providers_oauth2_oauth2provider (
   'per_provider',
   '1 minutes',
   '1 minutes',
-  '["http://192.168.50.234:8181/oauth2/callback"]'::jsonb
+  '["https://pobieranie.miasoftware.pl/oauth2/callback"]'::jsonb
 FROM authentik_core_provider WHERE name='qBittorrent' AND id NOT IN (SELECT provider_ptr_id FROM authentik_providers_oauth2_oauth2provider);
     `;
 
@@ -108,7 +108,7 @@ SELECT 'qBittorrent', 'qbittorrent', gen_random_uuid(), id FROM authentik_core_p
         client_id,
         client_secret,
         flow_uuid,
-        redirect_uri: 'http://192.168.50.234:8181/oauth2/callback'
+        redirect_uri: 'https://pobieranie.miasoftware.pl/oauth2/callback'
       }
     });
   } catch (error) {

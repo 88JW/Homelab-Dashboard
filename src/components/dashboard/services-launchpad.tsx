@@ -19,7 +19,7 @@ const services = [
     icon: Zap,
     status: "online",
     color: "from-orange-500 to-red-600",
-    url: "http://192.168.50.234:5679",
+    url: "https://n8n.miasoftware.pl",
   },
   {
     name: "Mealie",
@@ -27,7 +27,7 @@ const services = [
     icon: Utensils,
     status: "online",
     color: "from-emerald-500 to-teal-500",
-    url: "http://192.168.50.234:9925",
+    url: "https://mealie.miasoftware.pl",
     androidPackage: "com.pabloromeo.mealie",
   },
   {
@@ -36,7 +36,7 @@ const services = [
     icon: Download,
     status: "online",
     color: "from-blue-500 to-cyan-500",
-    url: "http://192.168.50.234:8181",
+    url: "https://pobieranie.miasoftware.pl",
     androidPackage: "me.fengmilo.qbitorrent",
   },
   {
@@ -45,7 +45,7 @@ const services = [
     icon: HardDrive,
     status: "online",
     color: "from-amber-500 to-orange-500",
-    url: "http://192.168.50.234:8080",
+    url: "https://files.miasoftware.pl",
   },
   {
     name: "Glances",
@@ -53,7 +53,7 @@ const services = [
     icon: Activity,
     status: "online",
     color: "from-indigo-500 to-purple-500",
-    url: "http://192.168.50.234:61208",
+    url: "https://status.miasoftware.pl",
   },
   {
     name: "Authentik",
@@ -61,16 +61,16 @@ const services = [
     icon: KeyRound,
     status: "online",
     color: "from-rose-500 to-pink-500",
-    url: "http://192.168.50.234:9000",
+    url: "https://aplikacje.miasoftware.pl",
     androidPackage: "io.goauthentik.app",
   },
   {
     name: "Cosmos",
     description: "Gateway",
     icon: Globe,
-    status: "offline",
+    status: "online",
     color: "from-red-500 to-rose-500",
-    url: "http://192.168.50.234",
+    url: "https://dash.miasoftware.pl/_admin/",
   },
 ]
 

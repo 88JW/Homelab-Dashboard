@@ -55,21 +55,22 @@ Dysk mechaniczny zamontowany w /mnt/dane służy jako główny magazyn plików i
 
 Wszystkie usługi działają w sieci bridge cosmos-network, co pozwala na komunikację po nazwach kontenerów.
 
-| Usługa | Port (UI) | URL Lokalne / Funkcja | Status |
+| Usługa | Port (UI) | URL Publiczny / Funkcja | Status |
 | --- | --- | --- | --- |
-| **Cosmos UI** | 80/443 | `https://192.168.50.234` (Gateway) | ✅ ONLINE |
-| **Nextcloud** | 8443 | `https://192.168.50.234:8443` (Chmura) | ✅ ONLINE |
-| **Immich** | 2283 | `http://192.168.50.234:2283` (Zdjęcia AI) | ✅ ONLINE |
-| **SFTPGo** | 8080 | `http://192.168.50.234:8080` (Pliki) | ✅ ONLINE |
+| **Cosmos UI** | 80/443 | `https://cosmos.miasoftware.pl` (Gateway) | ✅ ONLINE |
+| **Dashboard** | 3000 | `https://dash.miasoftware.pl` (SSO Entry) | ✅ ONLINE |
+| **Authentik** | 9000 | `https://aplikacje.miasoftware.pl` (Auth) | ✅ ONLINE |
+| **Nextcloud** | 8443 | `https://chmura.miasoftware.pl` (Chmura) | ✅ ONLINE |
+| **Immich** | 2283 | `https://immich.miasoftware.pl` (Zdjęcia AI) | ✅ ONLINE |
+| **SFTPGo** | 8080 | `https://pliki.miasoftware.pl` (Pliki) | ✅ ONLINE |
 | **Beszel** | 8090 | `http://192.168.50.234:8090` (Monitoring) | ✅ ONLINE |
-| **Mealie** | 9925 | `http://192.168.50.234:9925` (Przepisy) | ✅ ONLINE |
+| **Mealie** | 9925 | `https://przepisy.miasoftware.pl` (Przepisy) | ✅ ONLINE |
 | **Audiobookshelf** | 9930 | `http://192.168.50.234:9930` (Audiobooki) | ✅ ONLINE |
 | **BookWyrm** | 8085 | `http://192.168.50.234:8085` (Książki) | ✅ ONLINE |
-| **qBittorrent** | 8181 | `http://192.168.50.234:8181` (Pobieranie) | ✅ ONLINE |
+| **qBittorrent** | 8181 | `https://pobieranie.miasoftware.pl` (Pobieranie) | ✅ ONLINE |
 | **Changedetection** | 5000 | `http://192.168.50.234:5000` (Śledzenie) | ✅ ONLINE |
-| **n8n** | 5679 | `http://192.168.50.234:5679` (Automatyzacja) | ✅ ONLINE |
-| **SSO Portal** | 3000 | `http://192.168.50.234:3000` (Dashboard + Auth) | ✅ ONLINE |
-| **Glances** | 61208 | `http://192.168.50.234:61208` (API) | ✅ ONLINE |
+| **n8n** | 5679 | `https://n8n.miasoftware.pl` (Automatyzacja) | ⚠️ PENDING |
+| **Glances** | 61208 | `https://status.miasoftware.pl` (API) | ✅ ONLINE |
 | **Camera-FTP** | 21 | FTP (Bez UI) | ✅ ONLINE |
 
 ## **🛡️ 6. Koncepcja Bezpieczeństwa (Hardened Approach)**
@@ -86,6 +87,7 @@ Wszystkie usługi działają w sieci bridge cosmos-network, co pozwala na komuni
 *   **Faza 1 (ZAKOŃCZONA):** Infrastruktura, Docker Log Rotation, Glances (Root).
 *   **Faza 2 (ZAKOŃCZONA):** Szkielet Next.js, Shield Mode, Monitoring CPU/RAM/HDD.
 *   **Faza 3 (W TOKU):** Integracja listy kontenerów, sterowanie Restart/Stop, Alerty Telegram.
+*   **Faza 3.1 (ZAKOŃCZONA - 18.01.2026):** Naprawa dostępności mobilnej (Migracja z IP na Domeny).
 *   **Faza 4 (PLAN):** Logi Live via SSE, widok "Więzienia" CrowdSec, Panic Button.
 
 ## **📋 8. Procedury Utrzymania (Maintenance)**
@@ -618,10 +620,25 @@ docker-compose -f qbittorrent-docker-compose.yml restart
 
 | Aplikacja | Metoda | Status | URL |
 | --- | --- | --- | --- |
-| **Mealie** | Native OAuth2 | ✅ Działa | http://192.168.50.234:9091 |
-| **qBittorrent** | oauth2-proxy | ✅ Działa | http://192.168.50.234:8181 |
+| **Mealie** | Native OAuth2 | ✅ Działa | https://przepisy.miasoftware.pl |
+| **qBittorrent** | oauth2-proxy | ✅ Działa | https://pobieranie.miasoftware.pl |
 | **Immich** | Native OAuth2 | ✅ Działa | https://immich.miasoftware.pl |
-| **Nextcloud** | OIDC | ⏳ TODO | https://nextcloud.miasoftware.pl:8443 |
+| **Nextcloud** | OIDC | ✅ Działa | https://chmura.miasoftware.pl |
+
+---
+
+## **🛠️ Zmiany Architektoniczne: Dostęp Mobilny (18.01.2026)**
+
+### **Problem: Izolacja IP**
+Wcześniejsza konfiguracja opierała się na wewnętrznym adresie IP hosta (`192.168.50.234`). Powodowało to dwa kluczowe problemy:
+1.  **Mixed Content:** Próba wejścia z `https://dash.miasoftware.pl` na `http://192.168.50.234:PORT` była blokowana przez przeglądarki (bezpieczeństwo HTTPS).
+2.  **Brak Routingu:** Telefony w sieciach GSM lub innych WiFi nie mają dostępu do lokalnej klasy adresowej `192.168.50.x`.
+
+### **Rozwiązanie: Unifikacja Domenowa**
+Wprowadzono pełną migrację na subdomeny hostowane przez Cosmos Cloud:
+*   **Aplikacje:** Wszystkie tiles w Dashboardzie kierują teraz na `https://[subdomain].miasoftware.pl`.
+*   **SSO Auth:** `AUTHENTIK_ISSUER` został zmieniony z IP na `https://aplikacje.miasoftware.pl/...`, co pozwala na poprawną walidację sesji na każdym urządzeniu z dostępem do internetu.
+*   **Redirect URIs:** Zaktualizowano parametry `redirect_uri` w providerach OAuth2 (np. qBittorrent) na adresy domenowe.
 
 ---
 
