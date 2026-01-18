@@ -1,9 +1,11 @@
 "use client"
 
 import { useState } from "react"
-import { Shield, AlertTriangle } from "lucide-react"
+import { Shield, AlertTriangle, LogOut, User } from "lucide-react"
 import { Switch } from "@/components/ui/switch"
-import { useSession } from "next-auth/react"
+import { useSession, signOut } from "next-auth/react"
+import { Button } from "@/components/ui/button"
+import { Avatar, AvatarFallback, AvatarInitial } from "@/components/ui/avatar"
 import Image from "next/image"
 
 export function TopNav() {
@@ -31,6 +33,26 @@ export function TopNav() {
 
         {/* User & Panic Button */}
         <div className="flex items-center gap-4">
+          
+          {/* User Info */}
+          {session?.user && (
+            <div className="flex items-center gap-3 px-3 py-2 bg-slate-800/50 rounded-lg border border-slate-700/50">
+              <div className="flex items-center gap-2">
+                <User className="h-4 w-4 text-cyan-400" />
+                <span className="text-sm font-medium text-cyan-50">
+                  {session.user.name || session.user.email || 'User'}
+                </span>
+              </div>
+              <Button
+                variant="ghost" 
+                size="sm"
+                onClick={() => signOut({ callbackUrl: '/login' })}
+                className="h-8 px-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10"
+              >
+                <LogOut className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
           
           <div
             className={`flex items-center gap-4 px-4 py-2 rounded-lg border transition-all duration-300 ${
