@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Camera, Utensils, Download, HardDrive, Activity, Globe, ExternalLink, KeyRound, Zap } from "lucide-react"
+import { Camera, Utensils, Download, HardDrive, Activity, Globe, ExternalLink, KeyRound, Zap, Beer, Database } from "lucide-react"
 
 const services = [
   {
@@ -12,6 +12,14 @@ const services = [
     color: "from-purple-500 to-pink-500",
     url: "https://immich.miasoftware.pl/photos",
     androidPackage: "app.alextran.immich",
+  },
+  {
+    name: "BeerTaste",
+    description: "Beer Rating",
+    icon: Beer,
+    status: "online",
+    color: "from-yellow-500 to-amber-600",
+    url: "http://192.168.50.234:3005",
   },
   {
     name: "n8n",
@@ -71,6 +79,14 @@ const services = [
     status: "online",
     color: "from-red-500 to-rose-500",
     url: "https://dash.miasoftware.pl/_admin/",
+  },
+  {
+    name: "Supabase",
+    description: "Database",
+    icon: Database,
+    status: "online", 
+    color: "from-emerald-600 to-green-500",
+    url: "http://192.168.50.234:3100",
   },
 ]
 
