@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Camera, Utensils, Download, HardDrive, Activity, Globe, ExternalLink, KeyRound, Zap, Beer, Database, BookOpen, FileText } from "lucide-react"
+import { Camera, Utensils, Download, HardDrive, Activity, Globe, ExternalLink, KeyRound, Zap, Beer, Database, BookOpen, FileText, NotebookPen } from "lucide-react"
 
 const services = [
   {
@@ -103,6 +103,14 @@ const services = [
     status: "online",
     color: "from-blue-600 to-indigo-600",
     url: "http://192.168.50.234:3009",
+  },
+  {
+    name: "SilverBullet",
+    description: "Markdown Notes",
+    icon: NotebookPen,
+    status: "online",
+    color: "from-gray-500 to-slate-600",
+    url: "http://192.168.50.234:3010",
   },
 ]
 
