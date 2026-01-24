@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Camera, Utensils, Download, HardDrive, Activity, Globe, ExternalLink, KeyRound, Zap, Beer, Database } from "lucide-react"
+import { Camera, Utensils, Download, HardDrive, Activity, Globe, ExternalLink, KeyRound, Zap, Beer, Database, BookOpen, FileText } from "lucide-react"
 
 const services = [
   {
@@ -87,6 +87,22 @@ const services = [
     status: "online", 
     color: "from-emerald-600 to-green-500",
     url: "http://192.168.50.234:3100",
+  },
+  {
+    name: "Wiki.js",
+    description: "Documentation",
+    icon: BookOpen,
+    status: "online",
+    color: "from-slate-500 to-gray-600",
+    url: "http://192.168.50.234:3008",
+  },
+  {
+    name: "Docmost",
+    description: "Collaborative Docs",
+    icon: FileText,
+    status: "online",
+    color: "from-blue-600 to-indigo-600",
+    url: "http://192.168.50.234:3009",
   },
 ]
 
