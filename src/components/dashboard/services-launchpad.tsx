@@ -22,14 +22,6 @@ const services = [
     url: "http://192.168.50.234:3005",
   },
   {
-    name: "n8n",
-    description: "Automation",
-    icon: Zap,
-    status: "online",
-    color: "from-orange-500 to-red-600",
-    url: "https://n8n.miasoftware.pl",
-  },
-  {
     name: "Mealie",
     description: "Recipes",
     icon: Utensils,
@@ -61,7 +53,7 @@ const services = [
     icon: Activity,
     status: "online",
     color: "from-indigo-500 to-purple-500",
-    url: "https://status.miasoftware.pl",
+    url: "http://192.168.50.234:61208",
   },
   {
     name: "Authentik",
@@ -78,7 +70,7 @@ const services = [
     icon: Globe,
     status: "online",
     color: "from-red-500 to-rose-500",
-    url: "https://dash.miasoftware.pl/_admin/",
+    url: "http://192.168.50.234",
   },
   {
     name: "Supabase",

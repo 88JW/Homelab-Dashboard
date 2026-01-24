@@ -7,6 +7,7 @@ import { BeszelMetrics } from "@/components/dashboard/beszel-metrics"
 import { DockerOrbit } from "@/components/dashboard/docker-orbit"
 import { SecurityPrison } from "@/components/dashboard/security-prison"
 import { NetworkMonitor } from "@/components/dashboard/network-monitor"
+import SwapMonitor from "@/components/dashboard/swap-monitor"
 
 export default function Dashboard() {
   return (
@@ -16,13 +17,14 @@ export default function Dashboard() {
         {/* Services Launchpad - Most prominent */}
         <ServicesLaunchpad />
 
-        {/* Bottom Grid - Storage, Metrics, Docker, Security, Network */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-5 gap-6">
+        {/* Bottom Grid - Storage, Metrics, Docker, Security, Network, Swap */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-6 gap-6">
           <StorageCluster />
           <BeszelMetrics />
           <DockerOrbit />
           <SecurityPrison />
           <NetworkMonitor />
+          <SwapMonitor />
         </div>
       </main>
     </div>
