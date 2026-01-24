@@ -89,28 +89,12 @@ const services = [
     url: "http://192.168.50.234:3100",
   },
   {
-    name: "Wiki.js",
-    description: "Documentation",
-    icon: BookOpen,
-    status: "online",
-    color: "from-slate-500 to-gray-600",
-    url: "http://192.168.50.234:3008",
-  },
-  {
     name: "Docmost",
     description: "Collaborative Docs",
     icon: FileText,
     status: "online",
     color: "from-blue-600 to-indigo-600",
     url: "http://192.168.50.234:3009",
-  },
-  {
-    name: "BookStack",
-    description: "Wiki Platform",
-    icon: Book,
-    status: "online",
-    color: "from-teal-500 to-cyan-600",
-    url: "http://192.168.50.234:3011",
   },
 ]
 

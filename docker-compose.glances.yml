@@ -4,11 +4,14 @@ services:
     container_name: glances
     user: root
     restart: always
+    pid: host
     environment:
       - "GLANCES_OPT=-w"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /mnt:/mnt:ro
+      - /sys:/sys:ro
+      - /etc/os-release:/etc/os-release:ro
     networks:
       - cosmos-network
     ports:
