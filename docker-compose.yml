@@ -1,19 +1,35 @@
-version: "3.8"
+version: '3.8'
+
 services:
   dashboard:
-    build:
-      context: .
-      dockerfile: Dockerfile.dev
+    build: .
     container_name: homelab-dashboard
-    volumes:
-      - .:/app
-      - /app/node_modules
-    networks:
-      - cosmos-network
+    restart: unless-stopped
     ports:
       - "3001:3000"
-    restart: always
+    environment:
+      - NODE_ENV=production
+    networks:
+      - proxy-public
+    depends_on:
+      - glances
+
+  glances:
+    image: nicolargo/glances:latest
+    container_name: glances
+    restart: unless-stopped
+    pid: "host"
+    environment:
+      - "GLANCES_OPT=-w"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - proxy-public
+    # Port 61208 będzie dostępny w sieci, żebyś mógł sprawdzić same statystyki
+    ports:
+      - "61208:61208"
 
 networks:
-  cosmos-network:
+  proxy-public:
     external: true
+

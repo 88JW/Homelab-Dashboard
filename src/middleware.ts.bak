@@ -14,10 +14,11 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Sprawdź sesję cosmos_session
-  const session = request.cookies.get('cosmos_session');
+  // Sprawdź sesję NextAuth
+  const token = request.cookies.get('next-auth.session-token') || 
+                request.cookies.get('__Secure-next-auth.session-token');
 
-  if (!session && pathname === '/') {
+  if (!token && pathname === '/') {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 

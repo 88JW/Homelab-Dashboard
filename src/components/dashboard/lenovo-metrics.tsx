@@ -5,12 +5,10 @@ import { LineChart, Line, ResponsiveContainer, YAxis } from "recharts"
 import useSWR from 'swr'
 import { useState, useEffect } from 'react'
 
-interface DellStats {
+interface LenovoStats {
   online: boolean
   hostname: string
   cpu: number
-  mem: number
-  disk: number
   memory: {
     total: number
     used: number
@@ -41,15 +39,13 @@ interface DellStats {
     value: number
   }>
   uptime: string
-  containers: any[]
-  security: any
   error?: string
 }
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json())
 
-export function BeszelMetrics() {
-  const { data, error } = useSWR<DellStats>('/api/stats', fetcher, { 
+export function LenovoMetrics() {
+  const { data, error } = useSWR<LenovoStats>('/api/lenovo-stats', fetcher, { 
     refreshInterval: 2000,
     revalidateOnFocus: false
   })
@@ -60,7 +56,7 @@ export function BeszelMetrics() {
   useEffect(() => {
     if (data?.online && !error) {
       setCpuHistory(prev => [...prev, { value: data.cpu }].slice(-20))
-      setMemHistory(prev => [...prev, { value: data.memory?.percent || data.mem }].slice(-20))
+      setMemHistory(prev => [...prev, { value: data.memory.percent }].slice(-20))
     }
   }, [data, error])
 
@@ -74,7 +70,7 @@ export function BeszelMetrics() {
           </div>
           <div>
             <h3 className="text-sm font-mono font-semibold text-slate-300 tracking-wider uppercase">
-              Dell Server
+              Lenovo Server
             </h3>
             <p className="text-xs text-red-400 mt-1">OFFLINE</p>
           </div>
@@ -95,7 +91,7 @@ export function BeszelMetrics() {
             <Activity className="h-5 w-5 text-cyan-400" />
           </div>
           <h3 className="text-sm font-mono font-semibold text-slate-300 tracking-wider uppercase">
-            Dell Server
+            Lenovo Server
           </h3>
         </div>
         <div className="text-xs text-slate-400">Loading...</div>
@@ -103,9 +99,9 @@ export function BeszelMetrics() {
     )
   }
 
-  const primaryDisk = data.disks?.[0] || { name: 'SYSTEM', percent: data.disk || 0, used: 0, total: 0, mount: '/' }
-  const primaryNetwork = data.network?.[0] || { interface: 'N/A', rx_rate: 0, tx_rate: 0 }
-  const avgTemp = data.temperature?.length > 0 
+  const primaryDisk = data.disks[0] || { name: 'N/A', percent: 0, used: 0, total: 0 }
+  const primaryNetwork = data.network[0] || { interface: 'N/A', rx_rate: 0, tx_rate: 0 }
+  const avgTemp = data.temperature.length > 0 
     ? Math.round(data.temperature.reduce((acc, t) => acc + t.value, 0) / data.temperature.length)
     : 0
 
@@ -114,12 +110,12 @@ export function BeszelMetrics() {
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-cyan-500/20">
-            <Activity className="h-5 w-5 text-cyan-400" />
+          <div className="p-2 rounded-lg bg-orange-500/20">
+            <Activity className="h-5 w-5 text-orange-400" />
           </div>
           <div>
             <h3 className="text-sm font-mono font-semibold text-slate-300 tracking-wider uppercase">
-              Dell Server
+              Lenovo Server
             </h3>
             <p className="text-xs text-slate-500">{data.hostname}</p>
           </div>
@@ -164,7 +160,7 @@ export function BeszelMetrics() {
             <div className="flex items-center justify-between mb-1">
               <span className="text-xs font-mono text-slate-400">RAM</span>
               <span className="text-sm font-bold font-mono text-purple-400">
-                {data.memory?.used}GB / {data.memory?.total}GB ({data.memory?.percent || data.mem}%)
+                {data.memory.used}GB / {data.memory.total}GB ({data.memory.percent}%)
               </span>
             </div>
             <div className="h-8">
@@ -179,7 +175,7 @@ export function BeszelMetrics() {
         </div>
 
         {/* SWAP */}
-        {data.swap?.total > 0 && (
+        {data.swap.total > 0 && (
           <div className="p-3 rounded-xl bg-slate-900/50 border border-slate-700/30">
             <div className="flex items-center justify-between">
               <span className="text-xs font-mono text-slate-400">SWAP</span>

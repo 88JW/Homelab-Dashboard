@@ -3,25 +3,22 @@ version: '3.8'
 services:
   dashboard:
     image: node:20-alpine
-    container_name: homelab-dashboard-dev
+    container_name: homelab-dashboard
     working_dir: /app
     volumes:
       - .:/app
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /var/run/fail2ban:/var/run/fail2ban:ro
     ports:
-      - "3000:3000"
+      - "3005:3000" # Wystawiamy port 3005 na Dellu
     command: sh -c "apk add --no-cache docker-cli fail2ban && npm install --legacy-peer-deps && npm run dev -- --hostname 0.0.0.0"
-    env_file:
-      - .env.local
     environment:
       - NODE_ENV=development
       - DOCKER_API_VERSION=1.41
     restart: unless-stopped
     networks:
-      - default
-      - cosmos-network
+      - proxy-public # Musi być ta sieć!
 
 networks:
-  cosmos-network:
+  proxy-public:
     external: true
