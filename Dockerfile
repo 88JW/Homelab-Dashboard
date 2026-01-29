@@ -1,4 +1,5 @@
 FROM node:20-alpine
+RUN apk add --no-cache python3 sudo docker-cli util-linux
 WORKDIR /app
 COPY package*.json ./
 # Flaga --legacy-peer-deps rozwiąże błąd ERESOLVE

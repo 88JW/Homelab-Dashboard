@@ -6,71 +6,109 @@ const execAsync = promisify(exec);
 
 export async function GET() {
   try {
-    // Wykonaj komendę fail2ban na hoście przez docker exec do host namespace
-    // Alternatywnie możemy wykonać bezpośrednio na hoście
-    const { stdout: jailList } = await execAsync('fail2ban-client status 2>/dev/null || echo ""');
+    // Get CrowdSec decisions (banned IPs) from local CrowdSec instance
+    const { stdout: decisionsOutput } = await execAsync('docker exec crowdsec cscli decisions list --output json 2>/dev/null || echo "[]"');
     
-    const jails: string[] = [];
-    const jailMatch = jailList.match(/Jail list:\s+(.+)/);
-    if (jailMatch) {
-      jails.push(...jailMatch[1].split(/,\s*/));
+    // Get CrowdSec alerts
+    const { stdout: alertsOutput } = await execAsync('docker exec crowdsec cscli alerts list --limit 50 --output json 2>/dev/null || echo "[]"');
+
+    // Get Fail2Ban banned IPs
+    const { stdout: fail2banOutput } = await execAsync('nsenter --target 1 --mount --uts --ipc --net --pid -- sudo fail2ban-client status sshd 2>/dev/null || echo ""');
+
+    let decisions: any[] = [];
+    let alerts: any[] = [];
+    let fail2banIPs: any[] = [];
+
+    try {
+      decisions = JSON.parse(decisionsOutput);
+      if (!Array.isArray(decisions)) decisions = [];
+    } catch (e) {
+      decisions = [];
     }
 
-    let totalBanned = 0;
-    let totalFailed = 0;
-    const jailStats: any[] = [];
+    try {
+      alerts = JSON.parse(alertsOutput);
+      if (!Array.isArray(alerts)) alerts = [];
+    } catch (e) {
+      alerts = [];
+    }
 
-    // Pobierz szczegóły dla każdego jail'a
-    for (const jail of jails) {
-      try {
-        const { stdout: jailStatus } = await execAsync(`fail2ban-client status ${jail} 2>/dev/null || echo ""`);
-        
-        const currentlyFailedMatch = jailStatus.match(/Currently failed:\s+(\d+)/);
-        const totalFailedMatch = jailStatus.match(/Total failed:\s+(\d+)/);
-        const currentlyBannedMatch = jailStatus.match(/Currently banned:\s+(\d+)/);
-        const totalBannedMatch = jailStatus.match(/Total banned:\s+(\d+)/);
-        const bannedIPsMatch = jailStatus.match(/Banned IP list:\s*(.*)$/m);
-
-        const currentlyFailed = currentlyFailedMatch ? parseInt(currentlyFailedMatch[1]) : 0;
-        const totalFailedCount = totalFailedMatch ? parseInt(totalFailedMatch[1]) : 0;
-        const currentlyBanned = currentlyBannedMatch ? parseInt(currentlyBannedMatch[1]) : 0;
-        const totalBannedCount = totalBannedMatch ? parseInt(totalBannedMatch[1]) : 0;
-        const bannedIPs = bannedIPsMatch && bannedIPsMatch[1].trim() 
-          ? bannedIPsMatch[1].trim().split(/\s+/) 
-          : [];
-
-        totalBanned += currentlyBanned;
-        totalFailed += currentlyFailed;
-
-        jailStats.push({
-          name: jail,
-          currentlyFailed,
-          totalFailed: totalFailedCount,
-          currentlyBanned,
-          totalBanned: totalBannedCount,
-          bannedIPs
-        });
-      } catch (e) {
-        console.error(`Error getting status for jail ${jail}:`, e);
+    // Parse Fail2Ban output
+    if (fail2banOutput) {
+      const bannedMatch = fail2banOutput.match(/Banned IP list:\s+(.+)/);
+      if (bannedMatch && bannedMatch[1].trim()) {
+        const ips = bannedMatch[1].trim().split(/\s+/);
+        fail2banIPs = ips.map((ip: string) => ({
+          ip,
+          reason: 'SSH Brute Force (Fail2Ban)',
+          duration: '-',
+          origin: 'fail2ban',
+          type: 'ban',
+          scope: 'ip'
+        }));
       }
     }
 
+    // Combine CrowdSec and Fail2Ban decisions
+    const allDecisions = [...decisions, ...fail2banIPs];
+
+    // Count threat types from alerts
+    const threatTypes = {
+      sshBruteforce: 0,
+      httpScan: 0,
+      httpCrawl: 0,
+      httpExploit: 0,
+      portScan: 0,
+      other: 0
+    };
+
+    alerts.forEach((alert: any) => {
+      const scenario = alert.scenario || '';
+      if (scenario.includes('ssh')) threatTypes.sshBruteforce++;
+      else if (scenario.includes('http-scan')) threatTypes.httpScan++;
+      else if (scenario.includes('http-crawl')) threatTypes.httpCrawl++;
+      else if (scenario.includes('http-cve') || scenario.includes('exploit')) threatTypes.httpExploit++;
+      else if (scenario.includes('scan')) threatTypes.portScan++;
+      else if (scenario) threatTypes.other++;
+    });
+
     return NextResponse.json({
-      status: jails.length > 0 ? 'active' : 'inactive',
-      totalJails: jails.length,
-      totalBanned,
-      totalFailed,
-      jails: jailStats
+      status: 'active',
+      totalBanned: allDecisions.length,
+      totalAlerts: alerts.length,
+      decisions: allDecisions.slice(0, 10).map((d: any) => ({
+        ip: d.value || d.ip,
+        reason: d.scenario || d.reason || 'Unknown',
+        duration: d.duration || '-',
+        origin: d.origin || 'local',
+        type: d.type,
+        scope: d.scope
+      })),
+      recentAlerts: alerts.slice(0, 10).map((a: any) => ({
+        scenario: a.scenario,
+        source: a.source?.ip || 'unknown',
+        events_count: a.events_count || 1,
+        created_at: a.created_at
+      })),
+      threatTypes
     });
   } catch (error: any) {
-    console.error('Fail2ban API error:', error);
+    console.error('CrowdSec API error:', error);
     return NextResponse.json({ 
       status: 'error',
       error: error.message,
-      totalJails: 0,
       totalBanned: 0,
-      totalFailed: 0,
-      jails: []
+      totalAlerts: 0,
+      decisions: [],
+      recentAlerts: [],
+      threatTypes: {
+        sshBruteforce: 0,
+        httpScan: 0,
+        httpCrawl: 0,
+        httpExploit: 0,
+        portScan: 0,
+        other: 0
+      }
     }, { status: 200 });
   }
 }

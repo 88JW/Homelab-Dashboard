@@ -1,161 +1,147 @@
-# 🏠 HomeLab SSO Portal
+# Dashboard Homelab
 
-**Dashboard Next.js z integracją Authentik SSO**
+System monitoringu i zarządzania serwerami domowymi (Dell i Lenovo).
 
-![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)
-![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)
-![NextAuth](https://img.shields.io/badge/NextAuth.js-4-purple)
-![Docker](https://img.shields.io/badge/Docker-Compose-blue?logo=docker)
+## 🚀 Funkcje
 
-## 📋 Funkcje
+- **Monitorowanie zasobów**: CPU, RAM, dyski, sieć dla obu serwerów
+- **Docker Orbit**: Status kontenerów Docker w czasie rzeczywistym
+- **Security Prison**: Monitoring Fail2Ban i CrowdSec
+- **Services Launchpad**: Szybki dostęp do wszystkich usług
+- **Storage Health**: Stan dysków na Dell i Lenovo
+- **Swap Monitor**: Wykorzystanie pamięci swap
+- **Beszel Metrics**: Dodatkowe metryki systemowe
 
-✅ **Single Sign-On** - OAuth2 przez Authentik  
-✅ **App Grid** - 8 kafelków aplikacji HomeLab  
-✅ **System Stats** - CPU, RAM, kontenery (TODO: naprawa API)  
-✅ **User Session** - JWT tokens, auto logout  
-✅ **Middleware Protection** - Ochrona głównej strony
+## 🏗️ Architektura
 
-## 🚀 Quick Start
+### Serwery
+- **Dell** (192.168.50.234): 233GB NVMe + 1TB + 2x2TB
+- **Lenovo** (192.168.50.66): 467GB NVMe
 
-### 1. Uruchom z Docker Compose (Development)
+### Stack Technologiczny
+- Next.js 16.1.1 (App Router)
+- Glances API dla metryk systemowych
+- Docker Compose dla orkiestracji
+- TailwindCSS + shadcn/ui
+
+## 🔐 Autoryzacja
+
+Dashboard wykorzystuje tradycyjne logowanie hasłem:
+- Cookie: `cosmos_session`
+- Wygaśnięcie: 7 dni
+- Hasło: w zmiennej `MASTER_PASSWORD` w [route.ts](src/app/api/auth/route.ts)
+
+## 📦 Instalacja i uruchomienie
+
+### Uruchomienie na Lenovo (192.168.50.66)
 
 ```bash
-cd /home/wojciech/projects/dashboard
-docker-compose -f docker-compose.dev.yml up -d
+cd ~/projects/dashboard
+docker compose up -d
 ```
 
-### 2. Dostęp
+Dashboard dostępny pod: http://192.168.50.66:3001
 
-- **Dashboard:** http://192.168.50.234:3000
-- **Login:** Kliknij "Sign in with Authentik"
-- **Po zalogowaniu:** Zobacz kafelki aplikacji + system stats
+### Konfiguracja Glances na Dell
+
+Na serwerze Dell (192.168.50.234) uruchom:
+
+```bash
+docker stop $(docker ps -a | grep glances | awk '{print $1}') 2>/dev/null
+docker rm $(docker ps -a | grep glances | awk '{print $1}') 2>/dev/null
+
+docker run -d \
+  --name glances_dell \
+  --restart always \
+  -p 61208:61208 \
+  -e GLANCES_OPT="-w" \
+  -v /var/run/docker.sock:/var/run/docker.sock:ro \
+  -v /:/hostfs:ro \
+  -v /mnt:/mnt:ro \
+  --pid host \
+  --privileged \
+  nicolargo/glances:latest
+```
+
+**Ważne**: Montowanie `/:/hostfs:ro` jest wymagane, aby Glances widział wszystkie dyski hosta.
+
+## 🌐 Usługi
+
+| Usługa | Port | URL |
+|--------|------|-----|
+| Dashboard | 3001 | http://192.168.50.66:3001 |
+| Glances Dell | 61208 | http://192.168.50.234:61208 |
+| Glances Lenovo | 61209 | http://192.168.50.66:61209 |
+| Immich | 2283 | http://192.168.50.234:2283 |
+| Mealie | 9925 | http://192.168.50.234:9925 |
+| qBittorrent | 8080 | http://192.168.50.66:8080 |
+| Portainer | 9443 | https://192.168.50.234:9443 |
 
 ## 🔧 Konfiguracja
 
-### Environment Variables (`.env.local`)
+### API Endpoints
 
-```bash
-NEXTAUTH_URL=http://192.168.50.234:3000
-NEXTAUTH_SECRET=super-secret-key-change-in-production-32chars
+- **Dell Stats**: `/api/stats` → http://192.168.50.234:61208
+- **Lenovo Stats**: `/api/lenovo-stats` → http://glances:61208 (Docker network)
 
-AUTHENTIK_CLIENT_ID=dashboard-c8e625f59f00178d6843
-AUTHENTIK_CLIENT_SECRET=DashSecret+123456789ABCDEFGHIJKLMNOPQRST==
-AUTHENTIK_ISSUER=http://192.168.50.234:9000/application/o/dashboard
-```
+### Docker Network
 
-### Authentik OAuth2 Provider
+Dashboard i Glances Lenovo działają w sieci `proxy-public`.
 
-**Provider ID:** 6 (Dashboard)  
-**Redirect URI:** `http://192.168.50.234:3000/api/auth/callback/authentik`  
-**Scopes:** openid, email, profile
+### Pliki konfiguracyjne
 
-## 📁 Struktura Projektu
-
-```
-dashboard/
-├── src/
-│   ├── app/
-│   │   ├── api/
-│   │   │   ├── auth/[...nextauth]/route.ts  # NextAuth handler
-│   │   │   ├── stats/route.ts               # System stats API (TODO)
-│   │   │   └── containers/route.ts          # Docker API (TODO)
-│   │   ├── page.tsx                         # Main dashboard
-│   │   ├── login/page.tsx                   # SSO login page
-│   │   └── layout.tsx                       # Root layout + SessionProvider
-│   ├── components/
-│   │   ├── AppGrid.tsx                      # Kafelki aplikacji
-│   │   └── Providers.tsx                    # NextAuth SessionProvider
-│   └── middleware.ts                        # Auth protection
-├── .env.local                               # OAuth2 credentials
-├── docker-compose.dev.yml                   # Dev container
-└── package.json
-```
-
-## 🔐 Bezpieczeństwo
-
-- **JWT Sessions** - Tokeny przechowywane w cookie (httpOnly)
-- **Middleware** - Blokada głównej strony bez sesji
-- **OAuth2 PKCE** - S256 challenge dla bezpiecznego flow
-- **Scope Mappings** - openid, email, profile w Authentik
-
-## 📦 Backup & Restore
-
-### Backup
-
-```bash
-bash /home/wojciech/backups/backup-dashboard-sso.sh
-```
-
-**Zawartość:**
-- Kod źródłowy (`src/`)
-- OAuth2 credentials (`.env.local`)
-- Konfiguracja Dockera
-- Provider z Authentik (SQL dump)
-
-### Restore
-
-```bash
-BACKUP="/home/wojciech/backups/dashboard-sso-YYYYMMDD-HHMMSS"
-
-# Przywróć pliki
-cp -r $BACKUP/src/* /home/wojciech/projects/dashboard/src/
-cp $BACKUP/.env.local /home/wojciech/projects/dashboard/
-
-# Restart
-cd /home/wojciech/projects/dashboard
-docker-compose -f docker-compose.dev.yml restart
-```
+- [docker-compose.yml](docker-compose.yml) - Glances Lenovo + Dashboard
+- [docker-compose.dell.yml](docker-compose.dell.yml) - Template dla Dell Glances
+- [DELL_GLANCES_SETUP.md](DELL_GLANCES_SETUP.md) - Szczegółowe instrukcje dla Dell
 
 ## 🛠️ Development
 
-### Install Dependencies
-
 ```bash
-npm install --legacy-peer-deps
+# Lokalny development
+npm install
+npm run dev
+
+# Rebuild po zmianach w API
+rm -rf .next
+docker compose build --no-cache dashboard
+docker compose up -d
 ```
 
-### Run Dev Server
+## 📊 Monitoring
+
+Dashboard pobiera dane co 30 sekund:
+- Metryki systemowe przez Glances API
+- Status kontenerów Docker
+- Bezpieczeństwo (Fail2Ban, CrowdSec)
+- Sieć i swap
+
+## 🐛 Troubleshooting
+
+### Glances nie pokazuje dysków
+
+Sprawdź czy Glances ma zmontowany główny system plików:
 
 ```bash
-npm run dev -- --hostname 0.0.0.0
+docker exec glances_dell ls /hostfs
 ```
 
-### Check Logs
+Jeśli błąd, zrestartuj Glances z `-v /:/hostfs:ro`.
+
+### API timeout na Lenovo
+
+Dashboard używa nazwy Docker service (`glances`) zamiast IP - oba kontenery muszą być w tej samej sieci.
+
+### Brak danych na Dell
+
+Sprawdź czy Glances działa:
 
 ```bash
-docker logs -f homelab-dashboard-dev
+curl http://192.168.50.234:61208/api/4/all
 ```
 
-## 🗺️ Aplikacje w Grid
+## 📝 Changelog
 
-| Aplikacja | URL | SSO |
-|:----------|:----|:----|
-| **Immich** | https://immich.miasoftware.pl | ✅ OAuth2 |
-| **Mealie** | http://192.168.50.234:9091 | ✅ OAuth2 |
-| **qBittorrent** | http://192.168.50.234:8181 | ✅ oauth2-proxy |
-| **Nextcloud** | https://nextcloud.miasoftware.pl:8443 | ⏳ TODO |
-| **Beszel** | http://192.168.50.234:8090 | ❌ Brak |
-| **Changedetection** | http://192.168.50.234:5000 | ❌ Brak |
-| **BookWyrm** | http://192.168.50.234:8085 | ❌ Brak |
-| **Authentik** | http://192.168.50.234:9000 | ⚙️ Admin |
-
-## 📚 Dokumentacja
-
-- **Blueprint v11.3:** [HomeLab_Master_Blueprint_v11.3.md](./HomeLab_Master_Blueprint_v11.3.md)
-- **Roadmap:** [HomeLab Roadmap_ Plan Rozbudowy .md](./HomeLab%20Roadmap_%20Plan%20Rozbudowy%20.md)
-- **NextAuth Docs:** https://next-auth.js.org
-- **Authentik Docs:** https://docs.goauthentik.io
-
-## ⚠️ TODO
-
-- [ ] Naprawić `/api/stats` - połączenie z Glances
-- [ ] Naprawić `/api/containers` - Docker API
-- [ ] Dodać Nextcloud SSO (OIDC plugin)
-- [ ] Status check aplikacji (online/offline)
-- [ ] Real-time metrics chart
-
----
-
-**Wersja:** v1.0 (11.01.2026)  
-**Autor:** wojciech@miasoftware.pl  
-**Stack:** Next.js 16 + NextAuth.js 4 + Authentik 2024.12.3
+- **2026-01**: Migracja z Authentik OAuth na tradycyjne logowanie hasłem
+- **2026-01**: Dodanie monitoringu dla Lenovo
+- **2026-01**: Naprawa widoczności dysków przez montowanie `/hostfs`
+- **2026-01**: Optymalizacja API - użycie Docker network zamiast external IP
