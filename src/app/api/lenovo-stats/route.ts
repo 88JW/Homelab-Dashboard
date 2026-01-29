@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 
 export async function GET() {
-  const GLANCES_API = 'http://192.168.50.66:61208/api/4/all';
+  const GLANCES_API = 'http://glances:61208/api/4/all';
 
   try {
     const response = await fetch(GLANCES_API, { 
@@ -34,20 +34,23 @@ export async function GET() {
       .filter((fs: any) => {
         const device = fs.device_name || '';
         const mount = fs.mnt_point || '';
-        // Include NVMe and main physical drives
-        return device.includes('nvme') || 
-               (mount === '/' || mount.startsWith('/mnt/')) && 
-               !mount.includes('docker');
+        // Glances w Docker widzi host jako /hostfs
+        // Filtruj tylko główne dyski fizyczne (bez EFI)
+        return mount === '/hostfs' && 
+               (device.includes('/dev/nvme') || device.includes('/dev/sd'));
       })
-      .map((fs: any) => ({
-        name: fs.mnt_point === '/' ? 'SYSTEM' : 
-              (fs.mnt_point.split('/').pop()?.toUpperCase() || 'DISK'),
-        mount: fs.mnt_point || '/',
-        total: Math.round((fs.size || 0) / 1024 / 1024 / 1024), // GB
-        used: Math.round(((fs.size || 0) - (fs.free || 0)) / 1024 / 1024 / 1024), // GB
-        percent: Math.round(fs.percent || 0),
-        device: fs.device_name || 'N/A'
-      })) : [];
+      .map((fs: any) => {
+        // Usuń /hostfs z mount point dla wyświetlenia
+        const cleanMount = fs.mnt_point.replace('/hostfs', '') || '/';
+        return {
+          name: 'SYSTEM',
+          mount: '/',
+          total: Math.round((fs.size || 0) / 1024 / 1024 / 1024), // GB
+          used: Math.round(((fs.size || 0) - (fs.free || 0)) / 1024 / 1024 / 1024), // GB
+          percent: Math.round(fs.percent || 0),
+          device: fs.device_name || 'N/A'
+        };
+      }) : [];
 
     // Network data
     const networkInterfaces = Array.isArray(data.network) ? data.network

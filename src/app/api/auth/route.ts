@@ -11,7 +11,7 @@ export async function POST(request: Request) {
     const cookieStore = await cookies();
     cookieStore.set('cosmos_session', 'active', {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: false, // Zmienione na false dla HTTP
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 7,
       path: '/',

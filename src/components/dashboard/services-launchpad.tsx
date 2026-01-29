@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Camera, Utensils, Download, HardDrive, Activity, Globe, ExternalLink, KeyRound, Zap, Beer, Database, BookOpen, FileText, Book } from "lucide-react"
+import { Camera, Utensils, Download, HardDrive, Activity, ExternalLink, Beer, Database, FileText, Container, LayoutDashboard } from "lucide-react"
 
 const services = [
   {
@@ -10,7 +10,7 @@ const services = [
     icon: Camera,
     status: "online",
     color: "from-purple-500 to-pink-500",
-    url: "https://immich.miasoftware.pl/photos",
+    url: "http://192.168.50.234:2283",
     androidPackage: "app.alextran.immich",
   },
   {
@@ -27,7 +27,7 @@ const services = [
     icon: Utensils,
     status: "online",
     color: "from-emerald-500 to-teal-500",
-    url: "https://mealie.miasoftware.pl",
+    url: "http://192.168.50.234:9925",
     androidPackage: "com.pabloromeo.mealie",
   },
   {
@@ -36,7 +36,7 @@ const services = [
     icon: Download,
     status: "online",
     color: "from-blue-500 to-cyan-500",
-    url: "https://pobieranie.miasoftware.pl",
+    url: "http://192.168.50.234:8080",
     androidPackage: "me.fengmilo.qbitorrent",
   },
   {
@@ -48,29 +48,36 @@ const services = [
     url: "https://files.miasoftware.pl",
   },
   {
-    name: "Glances",
-    description: "Metrics",
+    name: "Glances Dell",
+    description: "Dell Metrics",
     icon: Activity,
     status: "online",
     color: "from-indigo-500 to-purple-500",
     url: "http://192.168.50.234:61208",
   },
   {
-    name: "Authentik",
-    description: "SSO",
-    icon: KeyRound,
+    name: "Glances Lenovo",
+    description: "Lenovo Metrics",
+    icon: Activity,
     status: "online",
-    color: "from-rose-500 to-pink-500",
-    url: "https://aplikacje.miasoftware.pl",
-    androidPackage: "io.goauthentik.app",
+    color: "from-violet-500 to-indigo-500",
+    url: "http://192.168.50.66:61209",
   },
   {
-    name: "Cosmos",
-    description: "Gateway",
-    icon: Globe,
+    name: "Portainer",
+    description: "Container Management",
+    icon: Container,
     status: "online",
-    color: "from-red-500 to-rose-500",
-    url: "http://192.168.50.234",
+    color: "from-cyan-500 to-blue-600",
+    url: "https://192.168.50.234:9443",
+  },
+  {
+    name: "Dashboard",
+    description: "Control Center",
+    icon: LayoutDashboard,
+    status: "online",
+    color: "from-slate-500 to-gray-600",
+    url: "http://192.168.50.66:3001",
   },
   {
     name: "Supabase",

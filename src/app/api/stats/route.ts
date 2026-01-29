@@ -1,9 +1,12 @@
 import { NextResponse } from 'next/server';
+import { exec } from 'child_process';
+import { promisify } from 'util';
 
+const execAsync = promisify(exec);
 let failedLoginAttempts = 0;
 
 export async function GET(request: Request) {
-  const GLANCES_API = 'http://glances:61208/api/4/all';
+  const GLANCES_API = 'http://192.168.50.234:61208/api/4/all';
   const url = new URL(request.url);
 
   if (url.searchParams.get('recordFailedLogin') === 'true') {
@@ -26,41 +29,93 @@ export async function GET(request: Request) {
       memory: Math.round((c.memory_usage || 0) / 1024 / 1024)
     })) : [];
 
-    // Filtruj główne dyski (wykluczając docker overlay i mountpointy systemowe)
-    const disks = Array.isArray(data.fs) ? data.fs
-      .filter((fs: any) => {
-        // Uwzględnij tylko główne dyski fizyczne po device_name
-        const device = fs.device_name || ''
-        const mount = fs.mnt_point || ''
-        return (device === '/dev/nvme0n1p1' && (mount === '/' || mount === '/mnt')) ||
-               (mount.startsWith('/mnt/') && device.startsWith('/dev/sd'))
-      })
-      .map((fs: any) => {
-        // Nazewnictwo dysków
-        let name = 'DISK'
-        const device = fs.device_name || ''
-        
-        if (device === '/dev/nvme0n1p1') {
-          name = 'SYSTEM'
-        } else if (fs.mnt_point === '/mnt/dane') {
-          name = 'DATA'
-        } else if (fs.mnt_point === '/mnt/photos') {
-          name = 'PHOTOS'
-        } else if (fs.mnt_point === '/mnt/backup') {
-          name = 'BACKUP'
-        } else {
-          name = fs.mnt_point.split('/').pop()?.toUpperCase() || 'DISK'
-        }
-        
-        return {
-          name: name,
-          mount: fs.mnt_point || '/',
-          total: Math.round((fs.size || 0) / 1024 / 1024 / 1024), // GB
-          used: Math.round(((fs.size || 0) - (fs.free || 0)) / 1024 / 1024 / 1024), // GB
-          percent: Math.round(fs.percent || 0),
-          device: fs.device_name || 'N/A'
-        }
-      }) : [];
+    // Filtruj główne dyski z Glances
+    // Dell Glances może mieć /hostfs lub tylko bind mounts - obsługujemy oba przypadki
+    let disks: any[] = [];
+    if (Array.isArray(data.fs)) {
+      const seenDevices = new Set<string>();
+      
+      // Sprawdź czy są mounty /hostfs (nowa konfiguracja)
+      const hasHostfs = data.fs.some((fs: any) => 
+        fs.mnt_point && fs.mnt_point.startsWith('/hostfs')
+      );
+      
+      disks = data.fs
+        .filter((fs: any) => {
+          const device = fs.device_name || '';
+          const mount = fs.mnt_point || '';
+          
+          // Pomijamy duplikaty
+          if (seenDevices.has(device)) {
+            return false;
+          }
+          
+          // Pomijamy Docker bind mounts i overlay
+          if (mount.includes('/etc/resolv.conf') || 
+              mount.includes('/etc/hostname') || 
+              mount.includes('/etc/hosts') ||
+              mount.includes('docker') ||
+              mount.includes('overlay')) {
+            return false;
+          }
+          
+          // Pomijamy EFI
+          if (mount.includes('/boot/efi') || mount.includes('/efi')) {
+            return false;
+          }
+          
+          // Akceptujemy tylko prawdziwe urządzenia blokowe
+          if (device.includes('/dev/nvme') || device.includes('/dev/sd')) {
+            // Z /hostfs: akceptujemy /hostfs i /hostfs/mnt/*
+            // Bez /hostfs: akceptujemy wszystkie (ale już odfiltrowane /etc)
+            if (hasHostfs) {
+              if (mount === '/hostfs' || mount.startsWith('/hostfs/mnt/')) {
+                seenDevices.add(device);
+                return true;
+              }
+            } else {
+              seenDevices.add(device);
+              return true;
+            }
+          }
+          
+          return false;
+        })
+        .map((fs: any) => {
+          const device = fs.device_name || '';
+          let mount = fs.mnt_point || '/';
+          
+          // Czyść /hostfs prefix
+          if (mount.startsWith('/hostfs')) {
+            mount = mount.replace('/hostfs', '') || '/';
+          }
+          
+          // Nazwy dysków
+          let name = 'DISK';
+          if (mount === '/' || device.includes('nvme0n1p1') || device.includes('sda1')) {
+            name = 'SYSTEM';
+          } else if (device.includes('sdb') || mount.includes('dane')) {
+            name = 'DATA 1TB';
+          } else if (device.includes('sdc') || mount.includes('photos')) {
+            name = 'PHOTOS 2TB';
+          } else if (device.includes('sdd') || mount.includes('backup')) {
+            name = 'BACKUP 2TB';
+          } else if (mount.startsWith('/mnt/')) {
+            const dirName = mount.split('/').filter(p => p).pop()?.toUpperCase() || 'DISK';
+            name = dirName;
+          }
+          
+          return {
+            name,
+            mount,
+            total: Math.round((fs.size || 0) / 1024 / 1024 / 1024),
+            used: Math.round(((fs.size || 0) - (fs.free || 0)) / 1024 / 1024 / 1024),
+            percent: Math.round(fs.percent || 0),
+            device: fs.device_name || 'N/A'
+          };
+        })
+        .filter(disk => disk !== null);
+    }
 
     // RAM data
     const memTotal = Math.round((data.mem?.total || 0) / 1024 / 1024 / 1024); // GB
