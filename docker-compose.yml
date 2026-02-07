@@ -11,10 +11,13 @@ services:
       - "3001:3000"
     environment:
       - NODE_ENV=production
+      - REDIS_URL=redis://mail-redis:6379
     networks:
       - proxy-public
+      - mail-private
     depends_on:
       - glances
+      - mail-redis
     extra_hosts:
       - "host.docker.internal:host-gateway"
     user: "0:0"
@@ -40,7 +43,35 @@ services:
     networks:
       - proxy-public
 
+  mail-redis:
+    image: redis:7-alpine
+    container_name: mail-redis
+    restart: unless-stopped
+    networks:
+      - mail-private
+
+  mail-collector:
+    build: ./mail-collector
+    container_name: mail-collector
+    restart: unless-stopped
+    depends_on:
+      - mail-redis
+    environment:
+      - REDIS_URL=redis://mail-redis:6379
+      - MAIL_ACCOUNTS_FILE=/run/secrets/mail_accounts
+      - REFRESH_INTERVAL_MS=60000
+    networks:
+      - mail-private
+    secrets:
+      - mail_accounts
+
 networks:
   proxy-public:
     external: true
+  mail-private:
+    driver: bridge
+
+secrets:
+  mail_accounts:
+    file: ./secrets/mail_accounts.json
 

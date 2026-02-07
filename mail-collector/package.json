@@ -1,0 +1,14 @@
+{
+  "name": "mail-collector",
+  "version": "1.0.0",
+  "private": true,
+  "main": "index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "imapflow": "^1.0.196",
+    "redis": "^4.7.1"
+  }
+}

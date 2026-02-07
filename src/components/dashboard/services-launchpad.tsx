@@ -1,7 +1,8 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Camera, Utensils, Download, HardDrive, Activity, ExternalLink, Beer, Database, FileText, Container, LayoutDashboard } from "lucide-react"
+import { Camera, Utensils, Download, HardDrive, Activity, ExternalLink, Beer, Database, FileText, Container, LayoutDashboard, Mail } from "lucide-react"
+import useSWR from "swr"
 
 const services = [
   {
@@ -10,7 +11,7 @@ const services = [
     icon: Camera,
     status: "online",
     color: "from-purple-500 to-pink-500",
-    url: "http://192.168.50.234:2283",
+    url: "https://immich.miasoftware.pl",
     androidPackage: "app.alextran.immich",
   },
   {
@@ -19,7 +20,7 @@ const services = [
     icon: Beer,
     status: "online",
     color: "from-yellow-500 to-amber-600",
-    url: "http://192.168.50.234:3005",
+    url: "https://beertaste.miasoftware.pl",
   },
   {
     name: "Mealie",
@@ -27,7 +28,7 @@ const services = [
     icon: Utensils,
     status: "online",
     color: "from-emerald-500 to-teal-500",
-    url: "http://192.168.50.234:9925",
+    url: "https://mealie.miasoftware.pl",
     androidPackage: "com.pabloromeo.mealie",
   },
   {
@@ -69,7 +70,7 @@ const services = [
     icon: Container,
     status: "online",
     color: "from-cyan-500 to-blue-600",
-    url: "https://192.168.50.234:9443",
+    url: "https://portainer.miasoftware.pl",
   },
   {
     name: "Dashboard",
@@ -77,7 +78,7 @@ const services = [
     icon: LayoutDashboard,
     status: "online",
     color: "from-slate-500 to-gray-600",
-    url: "http://192.168.50.66:3001",
+    url: "https://panel.miasoftware.pl",
   },
   {
     name: "Supabase",
@@ -93,12 +94,24 @@ const services = [
     icon: FileText,
     status: "online",
     color: "from-blue-600 to-indigo-600",
-    url: "http://192.168.50.234:3009",
+    url: "https://dokumentacja.miasoftware.pl",
+  },
+  {
+    name: "Mail",
+    description: "Email Admin",
+    icon: Mail,
+    status: "online",
+    color: "from-red-500 to-pink-600",
+    url: "https://mail.miasoftware.pl/admin",
   },
 ]
 
 export function ServicesLaunchpad() {
   const [isAndroid, setIsAndroid] = useState(false)
+  const { data } = useSWR('/api/mail/unread', (url: string) => fetch(url).then((res) => res.json()), {
+    refreshInterval: 15000
+  })
+  const unreadCount = typeof data?.total === 'number' ? data.total : 0
 
   useEffect(() => {
     setIsAndroid(/android/i.test(navigator.userAgent))
@@ -114,7 +127,12 @@ export function ServicesLaunchpad() {
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-7 gap-4">
         {services.map((service) => (
-          <ServiceTile key={service.name} service={service} isAndroid={isAndroid} />
+          <ServiceTile
+            key={service.name}
+            service={service}
+            isAndroid={isAndroid}
+            unreadCount={service.name === "Mail" ? unreadCount : null}
+          />
         ))}
       </div>
     </section>
@@ -124,9 +142,11 @@ export function ServicesLaunchpad() {
 function ServiceTile({
   service,
   isAndroid,
+  unreadCount,
 }: {
   service: (typeof services)[0]
   isAndroid: boolean
+  unreadCount: number | null
 }) {
   const Icon = service.icon
 
@@ -148,6 +168,11 @@ function ServiceTile({
       rel="noopener noreferrer"
       className="group relative overflow-hidden rounded-2xl border border-slate-700/50 bg-slate-800/30 backdrop-blur-xl p-6 transition-all duration-300 hover:scale-105 hover:border-cyan-500/50 hover:shadow-[0_0_40px_rgba(6,182,212,0.15)]"
     >
+      {typeof unreadCount === "number" && unreadCount > 0 && (
+        <div className="absolute top-3 right-3 rounded-full bg-cyan-500/20 px-2 py-0.5 text-xs font-semibold text-cyan-100">
+          {unreadCount}
+        </div>
+      )}
       {/* Glass effect overlay */}
       <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 

@@ -38,7 +38,6 @@ export function TopNav() {
 
         {/* User & Panic Button */}
         <div className="flex items-center gap-4">
-          
           {/* User Info */}
           <div className="flex items-center gap-3 px-3 py-2 bg-slate-800/50 rounded-lg border border-slate-700/50">
             <div className="flex items-center gap-2">
