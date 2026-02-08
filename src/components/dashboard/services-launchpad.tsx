@@ -1,10 +1,18 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Camera, Utensils, Download, HardDrive, Activity, ExternalLink, Beer, Database, FileText, Container, LayoutDashboard, Mail } from "lucide-react"
+import { Camera, Utensils, Download, HardDrive, Activity, ExternalLink, Beer, Database, FileText, Container, LayoutDashboard, Mail, Home } from "lucide-react"
 import useSWR from "swr"
 
 const services = [
+  {
+    name: "Home",
+    description: "Main Page",
+    icon: Home,
+    status: "online",
+    color: "from-sky-500 to-blue-500",
+    url: "https://home.miasoftware.pl",
+  },
   {
     name: "Immich",
     description: "Photos",
