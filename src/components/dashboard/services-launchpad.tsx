@@ -119,7 +119,15 @@ export function ServicesLaunchpad() {
   const { data } = useSWR('/api/mail/unread', (url: string) => fetch(url).then((res) => res.json()), {
     refreshInterval: 15000
   })
+  const { data: statusData } = useSWR(
+    '/api/services/status',
+    (url: string) => fetch(url).then((res) => res.json()),
+    { refreshInterval: 30000, revalidateOnFocus: false }
+  )
   const unreadCount = typeof data?.total === 'number' ? data.total : 0
+  const statusMap = new Map(
+    (statusData?.services || []).map((entry: { name: string; online: boolean }) => [entry.name, entry.online])
+  )
 
   useEffect(() => {
     setIsAndroid(/android/i.test(navigator.userAgent))
@@ -140,6 +148,9 @@ export function ServicesLaunchpad() {
             service={service}
             isAndroid={isAndroid}
             unreadCount={service.name === "Mail" ? unreadCount : null}
+            status={statusMap.has(service.name)
+              ? (statusMap.get(service.name) ? "online" : "offline")
+              : "checking"}
           />
         ))}
       </div>
@@ -151,10 +162,12 @@ function ServiceTile({
   service,
   isAndroid,
   unreadCount,
+  status,
 }: {
   service: (typeof services)[0]
   isAndroid: boolean
   unreadCount: number | null
+  status: "online" | "offline" | "checking"
 }) {
   const Icon = service.icon
 
@@ -207,17 +220,23 @@ function ServiceTile({
           <div className="flex items-center gap-2">
             <span
               className={`h-2 w-2 rounded-full ${
-                service.status === "online"
+                status === "online"
                   ? "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]"
-                  : "bg-red-400 shadow-[0_0_8px_rgba(248,113,113,0.8)]"
+                  : status === "offline"
+                    ? "bg-red-400 shadow-[0_0_8px_rgba(248,113,113,0.8)]"
+                    : "bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]"
               }`}
             />
             <span
               className={`text-xs font-mono uppercase tracking-wider ${
-                service.status === "online" ? "text-emerald-400" : "text-red-400"
+                status === "online"
+                  ? "text-emerald-400"
+                  : status === "offline"
+                    ? "text-red-400"
+                    : "text-amber-400"
               }`}
             >
-              {service.status}
+              {status}
             </span>
           </div>
           <ExternalLink className="h-4 w-4 text-slate-500 group-hover:text-cyan-400 transition-colors" />
