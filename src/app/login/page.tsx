@@ -1,42 +1,9 @@
 'use client';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { Card, Title, Text, Button } from "@tremor/react";
 import { ShieldAlert, Lock } from "lucide-react";
 
 export default function LoginPage() {
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const router = useRouter();
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-
-    try {
-      const response = await fetch('/api/auth', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok && data.success) {
-        router.push('/');
-        router.refresh();
-      } else {
-        setError(data.error || 'Błędne hasło');
-      }
-    } catch (err) {
-      setError('Błąd połączenia');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <main className="min-h-screen bg-zinc-950 flex items-center justify-center p-6">
       <div className="max-w-md w-full animate-in fade-in zoom-in duration-300">
@@ -54,34 +21,21 @@ export default function LoginPage() {
             Lenovo Cluster • Secure Access
           </Text>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Wprowadź hasło"
-                className="w-full bg-zinc-800 border border-zinc-700 text-white px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                disabled={loading}
-                autoFocus
-              />
+          <div className="space-y-4">
+            <div className="bg-amber-500/10 border border-amber-500/40 text-amber-200 px-4 py-3 rounded-lg text-sm text-center">
+              Dostep jest obslugiwany przez centralne SSO przed aplikacja.
             </div>
 
-            {error && (
-              <div className="bg-red-500/10 border border-red-500/50 text-red-400 px-4 py-2 rounded-lg text-sm">
-                {error}
-              </div>
-            )}
-
             <Button
-              type="submit"
-              disabled={loading || !password}
-              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-zinc-700 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-3"
+              asChild
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-3"
             >
-              <Lock size={18} />
-              {loading ? 'Logowanie...' : 'Zaloguj się'}
+              <Link href="/">
+                <Lock size={18} />
+                Przejdz do panelu
+              </Link>
             </Button>
-          </form>
+          </div>
 
           <div className="mt-8 p-4 bg-zinc-800/30 border border-zinc-800 rounded-lg">
             <Text className="text-zinc-500 text-xs text-center">

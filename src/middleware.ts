@@ -3,21 +3,25 @@ import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  
-  // Pozwól na API, assets i login
+  const forwardedUser = request.headers.get('x-forwarded-user')?.trim();
+
   if (
     pathname.startsWith('/api/') ||
     pathname.startsWith('/_next/') ||
-    pathname === '/login' ||
     pathname.startsWith('/favicon')
   ) {
     return NextResponse.next();
   }
 
-  // Sprawdź sesję cosmos_session
-  const session = request.cookies.get('cosmos_session');
+  if (pathname === '/login') {
+    if (forwardedUser) {
+      return NextResponse.redirect(new URL('/', request.url));
+    }
 
-  if (!session && pathname === '/') {
+    return NextResponse.next();
+  }
+
+  if (!forwardedUser && pathname === '/') {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
@@ -25,5 +29,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/', '/api/:path*'],
+  matcher: ['/', '/login'],
 };

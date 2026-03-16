@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Camera, Utensils, Download, HardDrive, Activity, ExternalLink, Beer, Database, FileText, Container, LayoutDashboard, Mail, Home } from "lucide-react"
+import { Camera, Utensils, Download, HardDrive, Activity, ExternalLink, Beer, Database, FileText, Container, LayoutDashboard, Mail, Home, ReceiptText, FolderArchive } from "lucide-react"
 import useSWR from "swr"
 
 const services = [
@@ -103,6 +103,30 @@ const services = [
     status: "online",
     color: "from-blue-600 to-indigo-600",
     url: "https://dokumentacja.miasoftware.pl",
+  },
+  {
+    name: "Paperless",
+    description: "Document Archive",
+    icon: FolderArchive,
+    status: "online",
+    color: "from-emerald-500 to-lime-600",
+    url: "https://paperless.miasoftware.pl",
+  },
+  {
+    name: "Firefly III",
+    description: "Home Finance",
+    icon: ReceiptText,
+    status: "online",
+    color: "from-orange-500 to-amber-600",
+    url: "https://firefly.miasoftware.pl",
+  },
+  {
+    name: "Finanse PWA",
+    description: "Mobile Expense App",
+    icon: ReceiptText,
+    status: "online",
+    color: "from-emerald-600 to-green-500",
+    url: "https://finanse.miasoftware.pl",
   },
   {
     name: "Mail",

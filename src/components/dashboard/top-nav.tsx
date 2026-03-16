@@ -1,21 +1,12 @@
 "use client"
 
 import { useState } from "react"
-import { Shield, AlertTriangle, LogOut, User } from "lucide-react"
+import { Shield, AlertTriangle, User } from "lucide-react"
 import { Switch } from "@/components/ui/switch"
-import { Button } from "@/components/ui/button"
 import Image from "next/image"
-import { useRouter } from "next/navigation"
 
-export function TopNav() {
+export function TopNav({ userName }: { userName: string }) {
   const [underAttack, setUnderAttack] = useState(false)
-  const router = useRouter()
-
-  const handleLogout = async () => {
-    await fetch('/api/auth/logout', { method: 'POST' })
-    router.push('/login')
-    router.refresh()
-  }
 
   return (
     <header className="sticky top-0 z-50 border-b border-cyan-500/20 bg-[#0f172a]/80 backdrop-blur-xl">
@@ -43,17 +34,9 @@ export function TopNav() {
             <div className="flex items-center gap-2">
               <User className="h-4 w-4 text-cyan-400" />
               <span className="text-sm font-medium text-cyan-50">
-                Admin
+                {userName}
               </span>
             </div>
-            <Button
-              variant="ghost" 
-              size="sm"
-              onClick={handleLogout}
-              className="h-8 px-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10"
-            >
-              <LogOut className="h-4 w-4" />
-            </Button>
           </div>
           
           <div

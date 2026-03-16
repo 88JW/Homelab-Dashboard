@@ -53,6 +53,18 @@ export const serviceRegistry: ServiceRegistryEntry[] = [
     url: "https://dokumentacja.miasoftware.pl",
   },
   {
+    name: "Paperless",
+    url: "https://paperless.miasoftware.pl",
+  },
+  {
+    name: "Firefly III",
+    url: "https://firefly.miasoftware.pl",
+  },
+  {
+    name: "Finanse PWA",
+    url: "https://finanse.miasoftware.pl",
+  },
+  {
     name: "Mail",
     url: "https://mail.miasoftware.pl/admin",
   },
