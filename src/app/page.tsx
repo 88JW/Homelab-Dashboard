@@ -6,6 +6,7 @@ import { LenovoMetrics } from "@/components/dashboard/lenovo-metrics"
 import { KubernetesCluster } from "@/components/dashboard/kubernetes-cluster"
 import { SecurityPrison } from "@/components/dashboard/security-prison"
 import { NetworkMonitor } from "@/components/dashboard/network-monitor"
+import { OperationsCenter } from "@/components/dashboard/operations-center"
 import { getSsoIdentity } from "@/lib/sso-user"
 
 export default async function Dashboard() {
@@ -25,6 +26,8 @@ export default async function Dashboard() {
         </div>
 
         <KubernetesCluster />
+
+        <OperationsCenter />
 
         {/* Operational detail */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

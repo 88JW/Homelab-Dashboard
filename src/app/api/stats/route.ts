@@ -92,14 +92,14 @@ export async function GET(request: Request) {
           
           // Nazwy dysków
           let name = 'DISK';
-          if (mount === '/' || device.includes('nvme0n1p1') || device.includes('sda1')) {
-            name = 'SYSTEM';
-          } else if (device.includes('sdb') || mount.includes('dane')) {
-            name = 'DATA 1TB';
-          } else if (device.includes('sdc') || mount.includes('photos')) {
-            name = 'PHOTOS 2TB';
-          } else if (device.includes('sdd') || mount.includes('backup')) {
+          if (mount.includes('backup')) {
             name = 'BACKUP 2TB';
+          } else if (mount.includes('photos')) {
+            name = 'PHOTOS 2TB';
+          } else if (mount.includes('dane')) {
+            name = 'DATA 1TB';
+          } else if (mount === '/' || device.includes('nvme0n1p1')) {
+            name = 'SYSTEM';
           } else if (mount.startsWith('/mnt/')) {
             const dirName = mount.split('/').filter(p => p).pop()?.toUpperCase() || 'DISK';
             name = dirName;
@@ -137,8 +137,8 @@ export async function GET(request: Request) {
         interface: net.interface_name || 'N/A',
         rx_bytes: Math.round((net.rx || 0) / 1024 / 1024), // MB
         tx_bytes: Math.round((net.tx || 0) / 1024 / 1024), // MB
-        rx_rate: Math.round((net.rx_rate || net.speed || 0) / 1024), // KB/s
-        tx_rate: Math.round((net.tx_rate || net.speed || 0) / 1024), // KB/s
+        rx_rate: Math.round((net.rx_rate || 0) / 1024), // KB/s
+        tx_rate: Math.round((net.tx_rate || 0) / 1024), // KB/s
       })) : [];
 
     // Temperature data

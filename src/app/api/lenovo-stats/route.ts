@@ -63,8 +63,8 @@ export async function GET() {
         interface: net.interface_name || 'N/A',
         rx_bytes: Math.round((net.rx || 0) / 1024 / 1024), // MB
         tx_bytes: Math.round((net.tx || 0) / 1024 / 1024), // MB
-        rx_rate: Math.round((net.rx_rate || net.speed || 0) / 1024), // KB/s
-        tx_rate: Math.round((net.tx_rate || net.speed || 0) / 1024), // KB/s
+        rx_rate: Math.round((net.rx_rate || 0) / 1024), // KB/s
+        tx_rate: Math.round((net.tx_rate || 0) / 1024), // KB/s
       })) : [];
 
     // Temperature data

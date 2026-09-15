@@ -1,5 +1,6 @@
 import "./globals.css";
 import Providers from "@/components/Providers";
+import { PwaRegistration } from "@/components/pwa-registration";
 
 export const metadata = {
   title: "Homelab Monitor",
@@ -15,6 +16,7 @@ export default function RootLayout({
     <html lang="pl" className="dark">
       <body className="bg-zinc-950 text-white antialiased">
         <Providers>
+          <PwaRegistration />
           {children}
         </Providers>
       </body>
