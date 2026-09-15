@@ -3,7 +3,7 @@ import { ServicesLaunchpad } from "@/components/dashboard/services-launchpad"
 import { StorageCluster } from "@/components/dashboard/storage-cluster"
 import { BeszelMetrics } from "@/components/dashboard/beszel-metrics"
 import { LenovoMetrics } from "@/components/dashboard/lenovo-metrics"
-import { DockerOrbit } from "@/components/dashboard/docker-orbit"
+import { KubernetesCluster } from "@/components/dashboard/kubernetes-cluster"
 import { SecurityPrison } from "@/components/dashboard/security-prison"
 import { NetworkMonitor } from "@/components/dashboard/network-monitor"
 import { getSsoIdentity } from "@/lib/sso-user"
@@ -24,10 +24,11 @@ export default async function Dashboard() {
           <LenovoMetrics />
         </div>
 
-        {/* Bottom Grid - Storage, Docker, Security, Network */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6">
+        <KubernetesCluster />
+
+        {/* Operational detail */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <StorageCluster />
-          <DockerOrbit />
           <SecurityPrison />
           <NetworkMonitor />
         </div>

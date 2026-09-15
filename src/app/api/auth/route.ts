@@ -4,14 +4,17 @@ import { cookies } from 'next/headers';
 export async function POST(request: Request) {
   const body = await request.json();
   const { password } = body;
+  const masterPassword = process.env.MASTER_PASSWORD;
 
-  const MASTER_PASSWORD = 'TwojeSilneHaslo123';
+  if (!masterPassword) {
+    return NextResponse.json({ error: 'Brak konfiguracji logowania' }, { status: 503 });
+  }
 
-  if (password === MASTER_PASSWORD) {
+  if (password === masterPassword) {
     const cookieStore = await cookies();
     cookieStore.set('cosmos_session', 'active', {
       httpOnly: true,
-      secure: false, // Zmienione na false dla HTTP
+      secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 7,
       path: '/',
